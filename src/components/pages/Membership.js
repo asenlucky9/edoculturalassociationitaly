@@ -1,140 +1,277 @@
 import React, { useState } from 'react';
+import { Container, Row, Col, Form, Button, Alert } from 'react-bootstrap';
+import { useMemberCount } from '../../context/MemberContext';
 import './Membership.css';
 
 const Membership = () => {
+  const { addApplication } = useMemberCount();
   const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
-    phone: '',
+    surname: '',
+    name: '',
+    dob: '',
+    gender: '',
+    nationality: '',
     address: '',
+    phone: '',
+    email: '',
+    occupation: '',
+    emergencyContact: '',
+    emergencyPhone: '',
     membershipType: 'individual',
-    message: ''
+    paymentMethod: 'cash'
   });
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [showError, setShowError] = useState(false);
+  const [applicationId, setApplicationId] = useState(null);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prevState => ({
-      ...prevState,
+    setFormData(prev => ({
+      ...prev,
       [name]: value
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Handle form submission here
-    console.log('Form submitted:', formData);
+    try {
+      // Submit the application
+      const id = addApplication(formData);
+      setApplicationId(id);
+      
+      setShowSuccess(true);
+      setShowError(false);
+      setFormData({
+        surname: '',
+        name: '',
+        dob: '',
+        gender: '',
+        nationality: '',
+        address: '',
+        phone: '',
+        email: '',
+        occupation: '',
+        emergencyContact: '',
+        emergencyPhone: '',
+        membershipType: 'individual',
+        paymentMethod: 'cash'
+      });
+    } catch (error) {
+      setShowError(true);
+      setShowSuccess(false);
+    }
   };
 
   return (
-    <div className="membership-page">
-      <section className="section">
-        <h2 className="section-title">Membership Registration</h2>
-        <div className="membership-content">
-          <div className="membership-info">
-            <h3>Why Become a Member?</h3>
-            <ul className="benefits-list">
-              <li>Access to exclusive cultural events</li>
-              <li>Regular newsletters and updates</li>
-              <li>Networking opportunities</li>
-              <li>Participation in cultural activities</li>
-              <li>Support in preserving Edo culture</li>
-            </ul>
-          </div>
+    <Container className="py-5">
+      <Row className="justify-content-center">
+        <Col md={8}>
+          <h2 className="text-center mb-4">Membership Registration</h2>
+          {showSuccess && (
+            <Alert variant="success" onClose={() => setShowSuccess(false)} dismissible>
+              Your application has been submitted successfully! Application ID: {applicationId}
+              <hr />
+              <p className="mb-0">
+                Your application will be reviewed by our team. You will be notified once it has been approved.
+              </p>
+            </Alert>
+          )}
+          {showError && (
+            <Alert variant="danger" onClose={() => setShowError(false)} dismissible>
+              An error occurred while submitting your application. Please try again.
+            </Alert>
+          )}
+          <Form onSubmit={handleSubmit} className="bg-white p-4 rounded shadow-sm">
+            <Row>
+              <Col md={6}>
+                <Form.Group className="mb-3">
+                  <Form.Label>Surname</Form.Label>
+                  <Form.Control
+                    type="text"
+                    name="surname"
+                    value={formData.surname}
+                    onChange={handleChange}
+                    required
+                  />
+                </Form.Group>
+              </Col>
+              <Col md={6}>
+                <Form.Group className="mb-3">
+                  <Form.Label>Name</Form.Label>
+                  <Form.Control
+                    type="text"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleChange}
+                    required
+                  />
+                </Form.Group>
+              </Col>
+            </Row>
 
-          <form className="membership-form" onSubmit={handleSubmit}>
-            <div className="form-group">
-              <label htmlFor="firstName">First Name</label>
-              <input
-                type="text"
-                id="firstName"
-                name="firstName"
-                value={formData.firstName}
-                onChange={handleChange}
-                required
-              />
-            </div>
+            <Row>
+              <Col md={6}>
+                <Form.Group className="mb-3">
+                  <Form.Label>Date of Birth</Form.Label>
+                  <Form.Control
+                    type="date"
+                    name="dob"
+                    value={formData.dob}
+                    onChange={handleChange}
+                    required
+                  />
+                </Form.Group>
+              </Col>
+              <Col md={6}>
+                <Form.Group className="mb-3">
+                  <Form.Label>Gender</Form.Label>
+                  <Form.Select
+                    name="gender"
+                    value={formData.gender}
+                    onChange={handleChange}
+                    required
+                  >
+                    <option value="">Select gender</option>
+                    <option value="male">Male</option>
+                    <option value="female">Female</option>
+                    <option value="other">Other</option>
+                  </Form.Select>
+                </Form.Group>
+              </Col>
+            </Row>
 
-            <div className="form-group">
-              <label htmlFor="lastName">Last Name</label>
-              <input
-                type="text"
-                id="lastName"
-                name="lastName"
-                value={formData.lastName}
-                onChange={handleChange}
-                required
-              />
-            </div>
+            <Row>
+              <Col md={6}>
+                <Form.Group className="mb-3">
+                  <Form.Label>Nationality</Form.Label>
+                  <Form.Control
+                    type="text"
+                    name="nationality"
+                    value={formData.nationality}
+                    onChange={handleChange}
+                    required
+                  />
+                </Form.Group>
+              </Col>
+              <Col md={6}>
+                <Form.Group className="mb-3">
+                  <Form.Label>Address</Form.Label>
+                  <Form.Control
+                    type="text"
+                    name="address"
+                    value={formData.address}
+                    onChange={handleChange}
+                    required
+                  />
+                </Form.Group>
+              </Col>
+            </Row>
 
-            <div className="form-group">
-              <label htmlFor="email">Email</label>
-              <input
-                type="email"
-                id="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                required
-              />
-            </div>
+            <Row>
+              <Col md={6}>
+                <Form.Group className="mb-3">
+                  <Form.Label>Phone</Form.Label>
+                  <Form.Control
+                    type="tel"
+                    name="phone"
+                    value={formData.phone}
+                    onChange={handleChange}
+                    required
+                  />
+                </Form.Group>
+              </Col>
+              <Col md={6}>
+                <Form.Group className="mb-3">
+                  <Form.Label>Email</Form.Label>
+                  <Form.Control
+                    type="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    required
+                  />
+                </Form.Group>
+              </Col>
+            </Row>
 
-            <div className="form-group">
-              <label htmlFor="phone">Phone</label>
-              <input
+            <Row>
+              <Col md={6}>
+                <Form.Group className="mb-3">
+                  <Form.Label>Occupation</Form.Label>
+                  <Form.Control
+                    type="text"
+                    name="occupation"
+                    value={formData.occupation}
+                    onChange={handleChange}
+                    required
+                  />
+                </Form.Group>
+              </Col>
+              <Col md={6}>
+                <Form.Group className="mb-3">
+                  <Form.Label>Emergency Contact</Form.Label>
+                  <Form.Control
+                    type="text"
+                    name="emergencyContact"
+                    value={formData.emergencyContact}
+                    onChange={handleChange}
+                    required
+                  />
+                </Form.Group>
+              </Col>
+            </Row>
+
+            <Form.Group className="mb-3">
+              <Form.Label>Emergency Phone</Form.Label>
+              <Form.Control
                 type="tel"
-                id="phone"
-                name="phone"
-                value={formData.phone}
+                name="emergencyPhone"
+                value={formData.emergencyPhone}
                 onChange={handleChange}
                 required
               />
-            </div>
+            </Form.Group>
 
-            <div className="form-group">
-              <label htmlFor="address">Address</label>
-              <textarea
-                id="address"
-                name="address"
-                value={formData.address}
-                onChange={handleChange}
-                required
-              />
-            </div>
+            <Row>
+              <Col md={6}>
+                <Form.Group className="mb-3">
+                  <Form.Label>Membership Type</Form.Label>
+                  <Form.Select
+                    name="membershipType"
+                    value={formData.membershipType}
+                    onChange={handleChange}
+                    required
+                  >
+                    <option value="individual">Individual</option>
+                    <option value="family">Family</option>
+                    <option value="student">Student</option>
+                  </Form.Select>
+                </Form.Group>
+              </Col>
+              <Col md={6}>
+                <Form.Group className="mb-3">
+                  <Form.Label>Payment Method</Form.Label>
+                  <Form.Select
+                    name="paymentMethod"
+                    value={formData.paymentMethod}
+                    onChange={handleChange}
+                    required
+                  >
+                    <option value="cash">Cash</option>
+                    <option value="bank">Bank Transfer</option>
+                    <option value="card">Card Payment</option>
+                  </Form.Select>
+                </Form.Group>
+              </Col>
+            </Row>
 
-            <div className="form-group">
-              <label htmlFor="membershipType">Membership Type</label>
-              <select
-                id="membershipType"
-                name="membershipType"
-                value={formData.membershipType}
-                onChange={handleChange}
-                required
-              >
-                <option value="individual">Individual</option>
-                <option value="family">Family</option>
-                <option value="student">Student</option>
-                <option value="corporate">Corporate</option>
-              </select>
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="message">Additional Message</label>
-              <textarea
-                id="message"
-                name="message"
-                value={formData.message}
-                onChange={handleChange}
-              />
-            </div>
-
-            <button type="submit" className="submit-button">
-              Submit Registration
-            </button>
-          </form>
-        </div>
-      </section>
-    </div>
+            <Button variant="primary" type="submit" className="w-100">
+              Submit Application
+            </Button>
+          </Form>
+        </Col>
+      </Row>
+    </Container>
   );
 };
 

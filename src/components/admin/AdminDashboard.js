@@ -1,9 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './AdminDashboard.css';
+import { Container, Row, Col, Table, Button, Badge, Tabs, Tab, Card, Form, Modal } from 'react-bootstrap';
+import { useMemberCount } from '../../context/MemberContext';
 
 const AdminDashboard = () => {
-  const [activeTab, setActiveTab] = useState('members');
+  const { applications, approveApplication, rejectApplication, getApplicationsByStatus } = useMemberCount();
+  const [activeMainTab, setActiveMainTab] = useState('membership');
+  const [activeMembershipTab, setActiveMembershipTab] = useState('pending');
   const [membershipApplications, setMembershipApplications] = useState([]);
   const [approvedMembers, setApprovedMembers] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -13,6 +17,7 @@ const AdminDashboard = () => {
   const [selectedApplication, setSelectedApplication] = useState(null);
   const [meetings, setMeetings] = useState([]);
   const [newMeeting, setNewMeeting] = useState({
+    title: '',
     date: '',
     time: '',
     attendees: []
@@ -102,11 +107,20 @@ const AdminDashboard = () => {
 
   const handleAddMeeting = (e) => {
     e.preventDefault();
-    const meetings = JSON.parse(localStorage.getItem('meetings') || '[]');
-    meetings.push({ ...newMeeting, id: Date.now() });
-    localStorage.setItem('meetings', JSON.stringify(meetings));
-    setMeetings(meetings);
-    setNewMeeting({ date: '', time: '', attendees: [] });
+    const meeting = {
+      id: Date.now(),
+      ...newMeeting,
+      createdAt: new Date().toISOString()
+    };
+    const updatedMeetings = [...meetings, meeting];
+    setMeetings(updatedMeetings);
+    localStorage.setItem('meetings', JSON.stringify(updatedMeetings));
+    setNewMeeting({
+      title: '',
+      date: '',
+      time: '',
+      attendees: []
+    });
   };
 
   const handleUpdateAttendance = (meetingId, memberId, attended) => {
@@ -137,14 +151,15 @@ const AdminDashboard = () => {
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        const gallery = JSON.parse(localStorage.getItem('gallery') || '[]');
-        gallery.push({
+        const newImage = {
           id: Date.now(),
           url: reader.result,
-          caption: file.name
-        });
-        localStorage.setItem('gallery', JSON.stringify(gallery));
-        setGallery(gallery);
+          caption: file.name,
+          uploadDate: new Date().toISOString()
+        };
+        const updatedGallery = [...gallery, newImage];
+        setGallery(updatedGallery);
+        localStorage.setItem('gallery', JSON.stringify(updatedGallery));
       };
       reader.readAsDataURL(file);
     }
@@ -247,29 +262,6 @@ const AdminDashboard = () => {
     setSelectedEvent(null);
   };
 
-  // Add useEffect to load events when component mounts
-  useEffect(() => {
-    // Check authentication
-    const isAuthenticated = localStorage.getItem('adminAuthenticated');
-    if (!isAuthenticated) {
-      navigate('/admin');
-    }
-    // Load data
-    loadData();
-  }, [navigate]);
-
-  // Add useEffect to load events when events tab is selected
-  useEffect(() => {
-    if (activeTab === 'events') {
-      const storedEvents = JSON.parse(localStorage.getItem('events') || '[]');
-      console.log('Loading events for events tab:', storedEvents);
-      setEvents(storedEvents);
-    }
-  }, [activeTab]);
-
-  // Add console log to check events state when rendering
-  console.log('Current events state:', events);
-
   const handleAddEvent = (e) => {
     e.preventDefault();
     
@@ -329,625 +321,374 @@ const AdminDashboard = () => {
     }
   };
 
+  const handleDeleteImage = (imageId) => {
+    if (window.confirm('Are you sure you want to delete this image?')) {
+      const updatedGallery = gallery.filter(img => img.id !== imageId);
+      setGallery(updatedGallery);
+      localStorage.setItem('gallery', JSON.stringify(updatedGallery));
+    }
+  };
+
+  const renderMembershipApplications = (status) => {
+    const filteredApplications = getApplicationsByStatus(status);
+    
+    return (
+      <Table responsive striped hover>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Type</th>
+            <th>Date</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {filteredApplications.map((app) => (
+            <tr key={app.id}>
+              <td>{app.id}</td>
+              <td>{app.surname} {app.name}</td>
+              <td>{app.email}</td>
+              <td>{app.membershipType}</td>
+              <td>{new Date(app.applicationDate).toLocaleDateString()}</td>
+              <td>
+                <Badge bg={
+                  app.status === 'approved' ? 'success' :
+                  app.status === 'rejected' ? 'danger' :
+                  'warning'
+                }>
+                  {app.status}
+                </Badge>
+              </td>
+              <td>
+                {app.status === 'pending' && (
+                  <>
+                    <Button
+                      variant="success"
+                      size="sm"
+                      className="me-2"
+                      onClick={() => approveApplication(app.id)}
+                    >
+                      Approve
+                    </Button>
+                    <Button
+                      variant="danger"
+                      size="sm"
+                      onClick={() => rejectApplication(app.id)}
+                    >
+                      Reject
+                    </Button>
+                  </>
+                )}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </Table>
+    );
+  };
+
   return (
-    <div className="admin-dashboard">
-      <header className="dashboard-header">
-        <h1>Admin Dashboard</h1>
-        <button onClick={handleLogout} className="logout-btn">Logout</button>
-      </header>
+    <Container fluid className="py-4">
+      <Row className="mb-4">
+        <Col>
+          <h2>Admin Dashboard</h2>
+        </Col>
+        <Col xs="auto">
+          <Button variant="outline-danger" onClick={handleLogout}>
+            Logout
+          </Button>
+        </Col>
+      </Row>
 
-      <nav className="dashboard-nav">
-        <button
-          className={`nav-btn ${activeTab === 'members' ? 'active' : ''}`}
-          onClick={() => setActiveTab('members')}
-        >
-          Membership Applications
-        </button>
-        <button
-          className={`nav-btn ${activeTab === 'approved' ? 'active' : ''}`}
-          onClick={() => setActiveTab('approved')}
-        >
-          Approved Members
-        </button>
-        <button
-          className={`nav-btn ${activeTab === 'meetings' ? 'active' : ''}`}
-          onClick={() => setActiveTab('meetings')}
-        >
-          Meetings
-        </button>
-        <button
-          className={`nav-btn ${activeTab === 'events' ? 'active' : ''}`}
-          onClick={() => setActiveTab('events')}
-        >
-          Events
-        </button>
-        <button
-          className={`nav-btn ${activeTab === 'gallery' ? 'active' : ''}`}
-          onClick={() => setActiveTab('gallery')}
-        >
-          Gallery
-        </button>
-        <button
-          className={`nav-btn ${activeTab === 'news' ? 'active' : ''}`}
-          onClick={() => setActiveTab('news')}
-        >
-          News
-        </button>
-      </nav>
+      <Tabs
+        activeKey={activeMainTab}
+        onSelect={(k) => setActiveMainTab(k)}
+        className="mb-4"
+      >
+        {/* Membership Management Tab */}
+        <Tab eventKey="membership" title="Membership Management">
+          <Row className="mb-4">
+            <Col md={4}>
+              <Card className="h-100">
+                <Card.Body>
+                  <Card.Title>Pending Applications</Card.Title>
+                  <Card.Text className="display-4">
+                    {getApplicationsByStatus('pending').length}
+                  </Card.Text>
+                </Card.Body>
+              </Card>
+            </Col>
+            <Col md={4}>
+              <Card className="h-100">
+                <Card.Body>
+                  <Card.Title>Approved Members</Card.Title>
+                  <Card.Text className="display-4">
+                    {getApplicationsByStatus('approved').length}
+                  </Card.Text>
+                </Card.Body>
+              </Card>
+            </Col>
+            <Col md={4}>
+              <Card className="h-100">
+                <Card.Body>
+                  <Card.Title>Rejected Applications</Card.Title>
+                  <Card.Text className="display-4">
+                    {getApplicationsByStatus('rejected').length}
+                  </Card.Text>
+                </Card.Body>
+              </Card>
+            </Col>
+          </Row>
+          <Tabs
+            activeKey={activeMembershipTab}
+            onSelect={(k) => setActiveMembershipTab(k)}
+            className="mb-3"
+          >
+            <Tab eventKey="pending" title="Pending Applications">
+              {renderMembershipApplications('pending')}
+            </Tab>
+            <Tab eventKey="approved" title="Approved Members">
+              {renderMembershipApplications('approved')}
+            </Tab>
+            <Tab eventKey="rejected" title="Rejected Applications">
+              {renderMembershipApplications('rejected')}
+            </Tab>
+          </Tabs>
+        </Tab>
 
-      <main className="dashboard-content">
-        {activeTab === 'approved' && (
-          <div className="approved-members-section">
-            <h2>Approved Members</h2>
-            <div className="search-box">
-              <input
-                type="text"
-                placeholder="Search by name or phone number..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="search-input"
-              />
-            </div>
-            <div className="members-list">
-              {filteredMembers.map(member => (
-                <div key={member.id} className="member-card">
-                  <div className="member-header">
-                    <h3>{member.surname}, {member.name}</h3>
-                    <span className="member-status">Active Member</span>
-                  </div>
-                  <div className="member-details">
-                    <p><strong>Email:</strong> {member.email}</p>
-                    <p><strong>Phone:</strong> {member.phone}</p>
-                    <p><strong>Joined:</strong> {new Date(member.submissionDate).toLocaleDateString()}</p>
-                    <p><strong>Occupation:</strong> {member.occupation}</p>
-                  </div>
-                  <div className="member-actions">
-                    <button 
-                      className="view-btn"
-                      onClick={() => handleViewApplication(member)}
-                    >
-                      View Details
-                    </button>
-                    <button 
-                      className="delete-btn"
-                      onClick={() => handleDeleteMember(member.id)}
-                    >
-                      Delete Member
-                    </button>
-                  </div>
-                </div>
-              ))}
-              {filteredMembers.length === 0 && (
-                <p className="no-data">
-                  {searchQuery ? 'No members found matching your search.' : 'No approved members yet.'}
-                </p>
-              )}
-            </div>
-          </div>
-        )}
-
-        {activeTab === 'members' && (
-          <div className="members-section">
-            <h2>Membership Applications</h2>
-            <div className="applications-list">
-              {membershipApplications.map(application => (
-                <div key={application.id} className="application-card">
-                  <div className="application-header">
-                    <h3>{application.surname}, {application.name}</h3>
-                    <span className={`status-badge ${application.status}`}>
-                      {application.status}
-                    </span>
-                  </div>
-                  <div className="application-details">
-                    <p><strong>Email:</strong> {application.email}</p>
-                    <p><strong>Phone:</strong> {application.phone}</p>
-                    <p><strong>Submitted:</strong> {new Date(application.submissionDate).toLocaleDateString()}</p>
-                  </div>
-                  <div className="application-actions">
-                    <button 
-                      className="view-btn"
-                      onClick={() => handleViewApplication(application)}
-                    >
-                      View Details
-                    </button>
-                    {application.status === 'pending' && (
-                      <div className="status-actions">
-                        <button 
-                          className="approve-btn"
-                          onClick={() => handleUpdateStatus(application.id, 'approved')}
+        {/* Events Management Tab */}
+        <Tab eventKey="events" title="Events Management">
+          <Row>
+            <Col md={4}>
+              <Card className="mb-4">
+                <Card.Body>
+                  <Card.Title>Add New Event</Card.Title>
+                  <Form onSubmit={handleAddEvent}>
+                    <Form.Group className="mb-3">
+                      <Form.Label>Event Title</Form.Label>
+                      <Form.Control
+                        type="text"
+                        value={newEvent.title}
+                        onChange={(e) => setNewEvent({...newEvent, title: e.target.value})}
+                        required
+                      />
+                    </Form.Group>
+                    <Form.Group className="mb-3">
+                      <Form.Label>Date</Form.Label>
+                      <Form.Control
+                        type="date"
+                        value={newEvent.date}
+                        onChange={(e) => setNewEvent({...newEvent, date: e.target.value})}
+                        required
+                      />
+                    </Form.Group>
+                    <Form.Group className="mb-3">
+                      <Form.Label>Time</Form.Label>
+                      <Form.Control
+                        type="time"
+                        value={newEvent.time}
+                        onChange={(e) => setNewEvent({...newEvent, time: e.target.value})}
+                        required
+                      />
+                    </Form.Group>
+                    <Form.Group className="mb-3">
+                      <Form.Label>Location</Form.Label>
+                      <Form.Control
+                        type="text"
+                        value={newEvent.location}
+                        onChange={(e) => setNewEvent({...newEvent, location: e.target.value})}
+                        required
+                      />
+                    </Form.Group>
+                    <Form.Group className="mb-3">
+                      <Form.Label>Description</Form.Label>
+                      <Form.Control
+                        as="textarea"
+                        rows={3}
+                        value={newEvent.description}
+                        onChange={(e) => setNewEvent({...newEvent, description: e.target.value})}
+                        required
+                      />
+                    </Form.Group>
+                    <Form.Group className="mb-3">
+                      <Form.Label>Event Image</Form.Label>
+                      <Form.Control
+                        type="file"
+                        accept="image/*"
+                        onChange={handleEventImageUpload}
+                      />
+                    </Form.Group>
+                    <Button type="submit" variant="primary">Add Event</Button>
+                  </Form>
+                </Card.Body>
+              </Card>
+            </Col>
+            <Col md={8}>
+              <h3>Upcoming Events</h3>
+              <Table responsive striped hover>
+                <thead>
+                  <tr>
+                    <th>Title</th>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Location</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {events.map(event => (
+                    <tr key={event.id}>
+                      <td>{event.title}</td>
+                      <td>{event.date}</td>
+                      <td>{event.time}</td>
+                      <td>{event.location}</td>
+                      <td>
+                        <Button
+                          variant="danger"
+                          size="sm"
+                          onClick={() => handleDeleteEvent(event.id)}
                         >
-                          Approve
-                        </button>
-                        <button 
-                          className="reject-btn"
-                          onClick={() => handleUpdateStatus(application.id, 'rejected')}
-                        >
-                          Reject
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              ))}
-              {membershipApplications.length === 0 && (
-                <p className="no-data">No membership applications received yet.</p>
-              )}
-            </div>
-          </div>
-        )}
+                          Delete
+                        </Button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </Table>
+            </Col>
+          </Row>
+        </Tab>
 
-        {activeTab === 'meetings' && (
-          <div className="meetings-section">
-            <h2>Member Attendance List</h2>
-            
-            {/* Add Attendance Form */}
-            <div className="add-attendance-form">
-              <h3>Mark Attendance</h3>
-              <form onSubmit={(e) => {
-                e.preventDefault();
-                handleMarkAttendance();
-              }}>
-                <div className="form-group">
-                  <label htmlFor="meetingTitle">Meeting Title</label>
-                  <input
-                    type="text"
-                    id="meetingTitle"
-                    value={meetingTitle}
-                    onChange={(e) => setMeetingTitle(e.target.value)}
-                    placeholder="Enter meeting title"
-                    required
-                  />
-                </div>
-                <div className="form-group">
-                  <label htmlFor="attendanceDate">Date</label>
-                  <input
-                    type="date"
-                    id="attendanceDate"
-                    value={attendanceDate}
-                    onChange={(e) => setAttendanceDate(e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="form-group">
-                  <label htmlFor="attendanceTime">Time</label>
-                  <input
-                    type="time"
-                    id="attendanceTime"
-                    value={attendanceTime}
-                    onChange={(e) => setAttendanceTime(e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="attendance-actions">
-                  <button type="button" className="select-all-btn" onClick={handleSelectAllPresent}>
-                    Select All Present
-                  </button>
-                  <button type="button" className="deselect-all-btn" onClick={handleDeselectAll}>
-                    Deselect All
-                  </button>
-                </div>
-                <div className="attendance-summary">
-                  <div className="summary-item present">
-                    <span className="summary-label">Present Members:</span>
-                    <span className="summary-value">{selectedMembers.length}</span>
-                  </div>
-                  <div className="summary-item absent">
-                    <span className="summary-label">Absent Members:</span>
-                    <span className="summary-value">{approvedMembers.length - selectedMembers.length}</span>
-                  </div>
-                </div>
-                <button type="submit" className="add-btn">Mark Attendance</button>
-              </form>
-            </div>
-
-            <div className="member-attendance-list">
-              {approvedMembers.map(member => (
-                <div 
-                  key={member.id} 
-                  className={`member-attendance-card ${selectedMembers.includes(member.id) ? 'present' : 'absent'}`}
-                  onClick={() => handleMemberSelection(member.id)}
-                >
-                  <div className="member-attendance-header">
-                    <h3>{member.surname}, {member.name}</h3>
-                    <span className={`member-status ${selectedMembers.includes(member.id) ? 'present' : 'absent'}`}>
-                      {selectedMembers.includes(member.id) ? 'Present' : 'Absent'}
-                    </span>
-                  </div>
-                  <div className="member-attendance-details">
-                    <p><strong>Email:</strong> {member.email}</p>
-                    <p><strong>Phone:</strong> {member.phone}</p>
-                    <p><strong>Joined:</strong> {new Date(member.submissionDate).toLocaleDateString()}</p>
-                    <p><strong>Occupation:</strong> {member.occupation}</p>
-                  </div>
-                  <div className="attendance-stats">
-                    <div className="attendance-stat-item">
-                      <span className="stat-label">Total Meetings</span>
-                      <span className="stat-value">{meetings.length}</span>
-                    </div>
-                    <div className="attendance-stat-item">
-                      <span className="stat-label">Present</span>
-                      <span className="stat-value present">
-                        {meetings.filter(meeting => meeting.attendees.includes(member.id)).length}
-                      </span>
-                    </div>
-                    <div className="attendance-stat-item">
-                      <span className="stat-label">Absent</span>
-                      <span className="stat-value absent">
-                        {meetings.filter(meeting => meeting.absentees?.includes(member.id)).length}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="member-actions">
-                    <button 
-                      className="view-btn"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleViewApplication(member);
-                      }}
-                    >
-                      View Details
-                    </button>
-                    <button 
-                      className="attendance-btn"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleViewMemberAttendance(member);
-                      }}
-                    >
-                      View Attendance
-                    </button>
-                  </div>
-                </div>
-              ))}
-              {approvedMembers.length === 0 && (
-                <p className="no-data">No approved members yet.</p>
-              )}
-            </div>
-          </div>
-        )}
-
-        {activeTab === 'events' && (
-          <div className="events-section">
-            <h2>Events Management</h2>
-            <form onSubmit={handleAddEvent} className="add-form">
-              <div className="form-group">
-                <label htmlFor="eventTitle">Event Title</label>
-                <input
-                  type="text"
-                  id="eventTitle"
-                  value={newEvent.title}
-                  onChange={(e) => setNewEvent({ ...newEvent, title: e.target.value })}
-                  required
-                />
-              </div>
-              <div className="form-group">
-                <label htmlFor="eventDate">Date</label>
-                <input
-                  type="date"
-                  id="eventDate"
-                  value={newEvent.date}
-                  onChange={(e) => setNewEvent({ ...newEvent, date: e.target.value })}
-                  required
-                />
-              </div>
-              <div className="form-group">
-                <label htmlFor="eventTime">Time</label>
-                <input
-                  type="time"
-                  id="eventTime"
-                  value={newEvent.time}
-                  onChange={(e) => setNewEvent({ ...newEvent, time: e.target.value })}
-                  required
-                />
-              </div>
-              <div className="form-group">
-                <label htmlFor="eventLocation">Location</label>
-                <input
-                  type="text"
-                  id="eventLocation"
-                  value={newEvent.location}
-                  onChange={(e) => setNewEvent({ ...newEvent, location: e.target.value })}
-                  required
-                />
-              </div>
-              <div className="form-group">
-                <label htmlFor="eventDescription">Description</label>
-                <textarea
-                  id="eventDescription"
-                  value={newEvent.description}
-                  onChange={(e) => setNewEvent({ ...newEvent, description: e.target.value })}
-                  required
-                />
-              </div>
-              <div className="form-group">
-                <label htmlFor="eventImage">Event Image</label>
-                <input
-                  type="file"
-                  id="eventImage"
-                  accept="image/*"
-                  onChange={handleEventImageUpload}
-                />
-              </div>
-              <button type="submit" className="add-btn">Create Event</button>
-            </form>
-
-            <div className="events-list">
-              {events && events.length > 0 ? (
-                events.map((event) => (
-                  <div key={event.id} className="event-card">
-                    <div className="event-header">
-                      <h3>{event.title}</h3>
-                      <span className="event-date">
-                        {new Date(event.date).toLocaleDateString()}
-                      </span>
-                    </div>
-                    <div className="event-details">
-                      <p><strong>Location:</strong> {event.location}</p>
-                      <p><strong>Time:</strong> {event.time}</p>
-                      <p><strong>Description:</strong> {event.description}</p>
-                      {event.image && (
-                        <div className="event-image">
-                          <img src={event.image} alt={event.title} />
-                        </div>
-                      )}
-                    </div>
-                    <div className="event-actions">
-                      <button 
-                        className="view-btn"
-                        onClick={() => handleViewEvent(event)}
-                      >
-                        View Details
-                      </button>
-                      <button 
-                        className="delete-btn"
-                        onClick={() => handleDeleteEvent(event.id)}
-                      >
-                        Delete Event
-                      </button>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <div className="no-data">
-                  <p>No events found. Create a new event to get started.</p>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
-        {activeTab === 'gallery' && (
-          <div className="gallery-section">
-            <h2>Gallery Management</h2>
-            <div className="upload-section">
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleImageUpload}
-                className="file-input"
-              />
-            </div>
-            <div className="gallery-grid">
-              {gallery.map(image => (
-                <div key={image.id} className="gallery-item">
-                  <img src={image.url} alt={image.caption} />
-                  <button className="delete-btn">Delete</button>
-                </div>
-              ))}
-              {gallery.length === 0 && (
-                <p className="no-data">No images in gallery.</p>
-              )}
-            </div>
-          </div>
-        )}
-
-        {activeTab === 'news' && (
-          <div className="news-section">
-            <h2>News Management</h2>
-            <form onSubmit={handleAddMeeting} className="add-form">
-              <div className="form-group">
-                <label htmlFor="newsTitle">Title</label>
-                <input
-                  type="text"
-                  id="newsTitle"
-                  value={newMeeting.title}
-                  onChange={(e) => setNewMeeting({ ...newMeeting, title: e.target.value })}
-                  required
-                />
-              </div>
-              <div className="form-group">
-                <label htmlFor="newsContent">Content</label>
-                <textarea
-                  id="newsContent"
-                  value={newMeeting.description}
-                  onChange={(e) => setNewMeeting({ ...newMeeting, description: e.target.value })}
-                  required
-                />
-              </div>
-              <button type="submit" className="add-btn">Add News</button>
-            </form>
-
-            <div className="news-list">
-              {news.map(item => (
-                <div key={item.id} className="news-card">
-                  <h3>{item.title}</h3>
-                  <p>{item.description}</p>
-                  <p className="date">{new Date(item.date).toLocaleDateString()}</p>
-                  <button className="delete-btn">Delete</button>
-                </div>
-              ))}
-              {news.length === 0 && (
-                <p className="no-data">No news articles added yet.</p>
-              )}
-            </div>
-          </div>
-        )}
-      </main>
-
-      {/* Application Details Modal */}
-      {selectedApplication && (
-        <div className="modal-overlay">
-          <div className="modal-content">
-            <button className="close-modal" onClick={handleCloseModal}>×</button>
-            <h2>Application Details</h2>
-            <div className="application-details-modal">
-              <div className="detail-section">
-                <h3>Personal Information</h3>
-                <p><strong>Name:</strong> {selectedApplication.name} {selectedApplication.surname}</p>
-                <p><strong>Email:</strong> {selectedApplication.email}</p>
-                <p><strong>Phone:</strong> {selectedApplication.phone}</p>
-                <p><strong>Date of Birth:</strong> {new Date(selectedApplication.dateOfBirth).toLocaleDateString()}</p>
-                <p><strong>Nationality:</strong> {selectedApplication.nationality}</p>
-                <p><strong>State of Origin:</strong> {selectedApplication.stateOfOrigin}</p>
-              </div>
-
-              <div className="detail-section">
-                <h3>Contact Information</h3>
-                <p><strong>Address:</strong> {selectedApplication.address}</p>
-                <p><strong>Occupation:</strong> {selectedApplication.occupation}</p>
-                <p><strong>ID Number/Passport:</strong> {selectedApplication.identification}</p>
-              </div>
-
-              <div className="detail-section">
-                <h3>Next of Kin</h3>
-                <p><strong>Name:</strong> {selectedApplication.nextOfKin.name}</p>
-                <p><strong>Relationship:</strong> {selectedApplication.nextOfKin.relationship}</p>
-                <p><strong>Phone:</strong> {selectedApplication.nextOfKin.phone}</p>
-                <p><strong>Address:</strong> {selectedApplication.nextOfKin.address}</p>
-              </div>
-
-              {selectedApplication.documents && selectedApplication.documents.length > 0 && (
-                <div className="detail-section">
-                  <h3>Documents</h3>
-                  <div className="documents-grid">
-                    {selectedApplication.documents.map((doc, index) => (
-                      <div key={index} className="document-item">
-                        {doc.startsWith('data:image') ? (
-                          <div className="image-preview">
-                            <img 
-                              src={doc} 
-                              alt={`Document ${index + 1}`} 
-                              onClick={() => window.open(doc, '_blank')}
-                            />
-                            <span>Document {index + 1}</span>
-                          </div>
-                        ) : (
-                          <div className="pdf-preview">
-                            <div className="pdf-icon">📄</div>
-                            <span>PDF Document {index + 1}</span>
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Attendance Modal */}
-      {selectedMeeting && (
-        <div className="attendance-modal">
-          <div className="attendance-content">
-            <button className="close-modal" onClick={handleCloseAttendanceModal}>×</button>
-            <h2>Attendance for {selectedMeeting.title}</h2>
-            <p className="meeting-info">
-              <strong>Date:</strong> {new Date(selectedMeeting.date).toLocaleString()}<br />
-              <strong>Location:</strong> {selectedMeeting.location}
-            </p>
-            <div className="attendance-list">
-              {approvedMembers.map(member => (
-                <div key={member.id} className="attendance-item">
-                  <span>{member.name} {member.surname}</span>
-                  <div className="attendance-checkbox">
-                    <input
-                      type="checkbox"
-                      checked={selectedMeeting.attendees.includes(member.id)}
-                      onChange={(e) => handleUpdateAttendance(
-                        selectedMeeting.id,
-                        member.id,
-                        e.target.checked
-                      )}
+        {/* Gallery Management Tab */}
+        <Tab eventKey="gallery" title="Gallery Management">
+          <Row>
+            <Col md={4}>
+              <Card className="mb-4">
+                <Card.Body>
+                  <Card.Title>Upload New Image</Card.Title>
+                  <Form.Group>
+                    <Form.Label>Select Image</Form.Label>
+                    <Form.Control
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageUpload}
                     />
-                    <span>{selectedMeeting.attendees.includes(member.id) ? 'Present' : 'Absent'}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-            <div className="attendance-summary">
-              <p>
-                <strong>Total Members:</strong> {approvedMembers.length}<br />
-                <strong>Present:</strong> {selectedMeeting.attendees.length}<br />
-                <strong>Absent:</strong> {approvedMembers.length - selectedMeeting.attendees.length}
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
+                  </Form.Group>
+                </Card.Body>
+              </Card>
+            </Col>
+            <Col md={8}>
+              <Row>
+                {gallery.map(image => (
+                  <Col md={4} key={image.id} className="mb-4">
+                    <Card>
+                      <Card.Img variant="top" src={image.url} />
+                      <Card.Body>
+                        <Card.Title>{image.caption}</Card.Title>
+                        <Button
+                          variant="danger"
+                          size="sm"
+                          onClick={() => handleDeleteImage(image.id)}
+                        >
+                          Delete
+                        </Button>
+                      </Card.Body>
+                    </Card>
+                  </Col>
+                ))}
+              </Row>
+            </Col>
+          </Row>
+        </Tab>
 
-      {selectedMember && (
-        <div className="attendance-modal">
-          <div className="attendance-content">
-            <button className="close-modal" onClick={() => setSelectedMember(null)}>×</button>
-            <h2>Attendance History for {selectedMember.name} {selectedMember.surname}</h2>
-            <div className="member-info">
-              <p><strong>Email:</strong> {selectedMember.email}</p>
-              <p><strong>Phone:</strong> {selectedMember.phone}</p>
-              <p><strong>Joined:</strong> {new Date(selectedMember.submissionDate).toLocaleDateString()}</p>
-            </div>
-            <div className="attendance-list">
-              {meetings.map(meeting => (
-                <div key={meeting.id} className="attendance-item">
-                  <div className="meeting-info">
-                    <h4>{meeting.title}</h4>
-                    <p>{new Date(meeting.date).toLocaleString()}</p>
-                  </div>
-                  <div className="attendance-status">
-                    {meeting.attendees.includes(selectedMember.id) ? (
-                      <span className="status-present">Present</span>
-                    ) : (
-                      <span className="status-absent">Absent</span>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-            <div className="attendance-summary">
-              <p>
-                <strong>Total Meetings:</strong> {meetings.length}<br />
-                <strong>Meetings Attended:</strong> {meetings.filter(meeting => meeting.attendees.includes(selectedMember.id)).length}<br />
-                <strong>Attendance Rate:</strong> {meetings.length > 0
-                  ? `${Math.round((meetings.filter(meeting => meeting.attendees.includes(selectedMember.id)).length / meetings.length) * 100)}%`
-                  : '0%'}
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Event Details Modal */}
-      {selectedEvent && (
-        <div className="modal-overlay">
-          <div className="modal-content">
-            <button className="close-modal" onClick={handleCloseEventModal}>×</button>
-            <h2>{selectedEvent.title}</h2>
-            <div className="detail-section">
-              <p><strong>Date:</strong> {new Date(selectedEvent.date).toLocaleDateString()}</p>
-              <p><strong>Location:</strong> {selectedEvent.location}</p>
-              <p><strong>Time:</strong> {selectedEvent.time}</p>
-              <p><strong>Description:</strong> {selectedEvent.description}</p>
-              {selectedEvent.image && (
-                <div className="event-image">
-                  <img src={selectedEvent.image} alt={selectedEvent.title} />
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
+        {/* Meetings & Attendance Tab */}
+        <Tab eventKey="meetings" title="Meetings & Attendance">
+          <Row>
+            <Col md={4}>
+              <Card className="mb-4">
+                <Card.Body>
+                  <Card.Title>Schedule New Meeting</Card.Title>
+                  <Form onSubmit={handleAddMeeting}>
+                    <Form.Group className="mb-3">
+                      <Form.Label>Meeting Title</Form.Label>
+                      <Form.Control
+                        type="text"
+                        value={newMeeting.title}
+                        onChange={(e) => setNewMeeting({...newMeeting, title: e.target.value})}
+                        required
+                      />
+                    </Form.Group>
+                    <Form.Group className="mb-3">
+                      <Form.Label>Date</Form.Label>
+                      <Form.Control
+                        type="date"
+                        value={newMeeting.date}
+                        onChange={(e) => setNewMeeting({...newMeeting, date: e.target.value})}
+                        required
+                      />
+                    </Form.Group>
+                    <Form.Group className="mb-3">
+                      <Form.Label>Time</Form.Label>
+                      <Form.Control
+                        type="time"
+                        value={newMeeting.time}
+                        onChange={(e) => setNewMeeting({...newMeeting, time: e.target.value})}
+                        required
+                      />
+                    </Form.Group>
+                    <Button type="submit" variant="primary">Schedule Meeting</Button>
+                  </Form>
+                </Card.Body>
+              </Card>
+            </Col>
+            <Col md={8}>
+              <h3>Scheduled Meetings</h3>
+              <Table responsive striped hover>
+                <thead>
+                  <tr>
+                    <th>Title</th>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Attendees</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {meetings.map(meeting => (
+                    <tr key={meeting.id}>
+                      <td>{meeting.title}</td>
+                      <td>{meeting.date}</td>
+                      <td>{meeting.time}</td>
+                      <td>{meeting.attendees?.length || 0}</td>
+                      <td>
+                        <Button
+                          variant="primary"
+                          size="sm"
+                          className="me-2"
+                          onClick={() => {/* Handle view attendance */}}
+                        >
+                          View Attendance
+                        </Button>
+                        <Button
+                          variant="danger"
+                          size="sm"
+                          onClick={() => {/* Handle delete meeting */}}
+                        >
+                          Delete
+                        </Button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </Table>
+            </Col>
+          </Row>
+        </Tab>
+      </Tabs>
+    </Container>
   );
 };
 

@@ -188,4 +188,143 @@
     width: 200px;
     height: 200px;
   }
+}
+
+/* Featured Section */
+.featured-section {
+  padding: 6rem 0;
+  background: white;
+}
+
+.featured-image-container {
+  position: relative;
+  overflow: hidden;
+  border-radius: 12px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+.featured-image-container img {
+  width: 100%;
+  height: auto;
+  transition: transform 0.3s ease;
+}
+
+.featured-image-container:hover img {
+  transform: scale(1.02);
+}
+
+/* Gallery Section */
+.gallery-section {
+  padding: 6rem 0;
+  background: var(--light-gray);
+}
+
+.gallery-card {
+  border: none;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px var(--shadow-color);
+  transition: all 0.3s ease;
+  background: white;
+}
+
+.gallery-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 30px var(--shadow-color);
+}
+
+.gallery-image {
+  height: 240px;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.gallery-card:hover .gallery-image {
+  transform: scale(1.05);
+}
+
+.gallery-card .card-body {
+  padding: 1.5rem;
+}
+
+.gallery-card .card-title {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: var(--primary-color);
+}
+
+.gallery-card .card-text {
+  font-size: 0.9rem;
+  color: #666;
+}
+
+/* Events Section */
+.events-section {
+  padding: 6rem 0;
+  background: white;
+}
+
+.event-card {
+  border: none;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px var(--shadow-color);
+  transition: all 0.3s ease;
+  background: white;
+}
+
+.event-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 30px var(--shadow-color);
+}
+
+.event-card .card-body {
+  padding: 2rem;
+}
+
+.event-date .badge {
+  padding: 0.5rem 1rem;
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.event-card .card-title {
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: var(--primary-color);
+}
+
+.event-card .card-text {
+  color: #666;
+  font-size: 0.95rem;
+}
+
+/* Responsive Design */
+@media (max-width: 991px) {
+  .featured-section {
+    padding: 4rem 0;
+  }
+
+  .featured-image-container {
+    margin-top: 2rem;
+  }
+
+  .gallery-section,
+  .events-section {
+    padding: 4rem 0;
+  }
+
+  .gallery-image {
+    height: 200px;
+  }
+}
+
+@media (max-width: 767px) {
+  .gallery-card {
+    margin-bottom: 1.5rem;
+  }
+
+  .event-card {
+    margin-bottom: 1.5rem;
+  }
 } 
