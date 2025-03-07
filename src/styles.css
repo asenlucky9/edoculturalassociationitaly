@@ -1,0 +1,291 @@
+/* Ensure the body and html take full height */
+html, body {
+    height: 100%;
+    margin: 0;
+    font-family: Arial, sans-serif; /* Set a default font for better readability */
+}
+
+/* Main layout to use Flexbox */
+#app {
+    display: flex;
+    flex-direction: column;
+    min-height: 150vh; /* Ensures the app takes at least full viewport height */
+}
+
+/* Set the main content to fill the remaining space */
+main {
+    flex: 1; /* This will allow the main content to take the available space */
+    padding: 10px; /* Add some padding for inner spacing */
+    background-color: #f5ebeb; /* Light background for the main content */
+}
+
+/* Style for the footer */
+footer {
+    background-color: #010101; /* Optional: background color */
+    color: #ffffff; /* Footer text color */
+    text-align: center; /* Center the text */
+    padding: 1em 0; /* Add some padding */
+    position: relative;
+    bottom: 0; /* Stick to the bottom */
+    width: 100%; /* Full width */
+}
+
+/* Marquee styling */
+.marquee {
+    overflow: hidden;
+    white-space: nowrap;
+    animation: scroll 50s linear infinite; /* Create scrolling effect */
+}
+
+/* Flag styles with wave animation */
+.flag {
+    width: 100px;
+    height: auto;
+    position: absolute;
+    top: 10px;
+    animation: wave 5s ease-in-out infinite;
+    transform-origin: 50% 0%; /* Ensures the wave starts from the top edge */
+}
+
+.flag-left {
+    left: 10px;
+}
+
+.flag-right {
+    right: 10px;
+}
+
+/* Flag waving animation */
+@keyframes wave {
+    0% { transform: rotate(0deg) translateY(0); }
+    20% { transform: rotate(5deg) translateY(-3px); }
+    40% { transform: rotate(-5deg) translateY(3px); }
+    60% { transform: rotate(3deg) translateY(-2px); }
+    80% { transform: rotate(-3deg) translateY(2px); }
+    100% { transform: rotate(0deg) translateY(0); }
+}
+
+/* Animation for marquee */
+@keyframes scroll {
+    from {
+        transform: translateX(100%);
+    }
+    to {
+        transform: translateX(-100%);
+    }
+}
+
+/* General styles for the navigation links */
+nav {
+    display: flex;
+    justify-content: space-around; /* Space links evenly */
+    margin-top: 20px;
+    background-color: #130101; /* Dark background for navigation */
+    padding: 10px 0; /* Padding for the nav bar */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Light shadow for depth */
+}
+
+/* Link styles */
+nav a {
+    color: #3498db; /* Link color, feel free to adjust */
+    text-decoration: none; /* Remove underline */
+    padding: 10px 15px; /* Space around the links */
+    font-weight: bold;
+    font-size: 1rem;
+    transition: color 0.3s ease, background-color 0.3s ease; /* Smooth transition */
+    border-radius: 5px;
+}
+
+/* Hover effect */
+nav a:hover {
+    color: #c91919; /* Hover text color */
+    background-color: #2980b9; /* Hover background color */
+}
+
+/* Active link styling */
+nav a:active {
+    color: #ffffff;
+    background-color: #f1f4f5; /* Light background for the active state */
+}
+
+/* Image section styles */
+.image-section {
+    margin: 20px 0;
+}
+
+/* Video container styles */
+.video-container {
+    display: flex;
+    flex-direction: column; /* Stack items vertically */
+    align-items: center; /* Center horizontally */
+    margin: 20px 0; /* Add some vertical spacing */
+}
+
+.video-container video {
+    max-width: 60%; /* Make sure the video is responsive */
+    height: auto; /* Maintain aspect ratio */
+}
+
+/* Form styles */
+.login-form,
+.event-form {
+    max-width: 400px; /* Set a max width for the form */
+    margin: 0 auto; /* Center the form */
+    padding: 20px; /* Add some padding */
+    border: 1px solid #ccc; /* Border around the form */
+    border-radius: 5px; /* Rounded corners */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    background-color: #fff; /* Background color */
+}
+
+/* Input field styles */
+.input-field {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border: 2px solid #ccc; /* Border color */
+    border-radius: 5px; /* Rounded corners */
+    font-size: 16px; /* Font size */
+    transition: border-color 0.3s; /* Smooth transition */
+}
+
+.input-field:focus {
+    border-color: #007bff; /* Focus border color */
+    outline: none; /* Remove outline */
+}
+
+/* Error message styles */
+.error-message {
+    color: red; /* Error message color */
+    font-size: 14px; /* Font size for error message */
+}
+
+/* Button styles */
+.login-button,
+.remove-button {
+    padding: 10px 15px; /* Padding for the button */
+    border: none; /* Remove default border */
+    border-radius: 1000px; /* Rounded corners */
+    background-color: #d8dce0; /* Button background color */
+    color: rgb(13, 2, 2); /* Button text color */
+    font-size: 16px; /* Font size */
+    cursor: pointer; /* Pointer cursor on hover */
+    transition: background-color 0.3s; /* Smooth transition */
+}
+
+.login-button:hover,
+.remove-button:hover {
+    background-color: #dadee2; /* Darker shade on hover */
+}
+
+/* Social media links styles */
+.social-media-links {
+    display: flex;
+    justify-content: flex-start; /* Align icons to the start */
+    margin-top: 10px; /* Space above the social media links */
+}
+
+.social-media-links a {
+    margin: 0 10px; /* Space between icons */
+}
+
+.social-media-links img {
+    width: 30px; /* Set icon size */
+    height: 30px; /* Set icon size */
+    transition: transform 0.3s; /* Add transition for hover effect */
+}
+
+.social-media-links img:hover {
+    transform: scale(1.1); /* Slightly enlarge icon on hover */
+}
+
+/* New Contact Information Styles */
+.contact-info {
+    margin-bottom: 10px; /* Space below contact info */
+}
+
+/* Additional styles for the contact info span */
+.contact-info span {
+    display: block; /* Display each line as a block */
+    margin: px ; /* Space between lines */
+}
+/* WhatsAppChat.css */
+.whatsapp-chat {
+    position: fixed;
+    bottom: 50px;
+    right: 20px;
+    background-color: #25D366;
+    border-radius: 50%;
+    padding: 5px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transition: background-color 0.3s;
+}
+
+.whatsapp-chat:hover {
+    background-color: #128C7E;
+}
+
+.whatsapp-icon {
+    width: 60px;
+    height: 60px;
+}
+@keyframes fly {
+    0% {
+        transform: translateY(0) translateX(0);
+    }
+    100% {
+        transform: translateY(-200px) translateX(100vw);
+    }
+}
+
+.bird {
+    position: absolute;
+    animation: fly linear infinite;
+    width: 250px; /* Adjust size as necessary */
+}
+
+.bird:nth-child(1) {
+    top: 10%;
+    left: 10%;
+    animation-duration: 12s; /* Adjust speed */
+}
+
+.bird:nth-child(2) {
+    top: 40%;
+    left: 10%;
+    animation-duration: 10s;
+}
+
+.bird:nth-child(3) {
+    top: 30%;
+    left: 10%;
+    animation-duration: 15s;
+}
+
+.bird:nth-child(4) {
+    top: 50%;
+    left: 10%;
+    animation-duration: 11s;
+}
+
+/* Optional: Add styles for the rest of your app */
+#app {
+    position: relative; /* Needed to position the birds correctly */
+    overflow: hidden; /* Prevents birds from showing outside the app */
+}
+.header {
+    background-color: rgb(23, 23, 25); /* Adjust color if necessary */
+    color: white; /* Text color */
+    padding: 1px 10px; /* Adjust padding for smaller height */
+    margin-bottom: 1px; /* Space below the header */
+    text-align:center; /* Center text */
+}
+
+.logo {
+    max-height: 1px; /* Adjust logo size */
+}
+
+.flag {
+    max-height: 200px; /* Adjust flag size */
+    margin: 0 10px; /* Adjust margin between flags */
+}

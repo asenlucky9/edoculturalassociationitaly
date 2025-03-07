@@ -1,0 +1,50 @@
+/* MembershipRegister.css */
+
+form {
+    max-width: 600px; /* Limit form width */
+    margin: 0 auto; /* Center the form */
+    padding: 20px; /* Add padding around the form */
+    border: 1px solid #ccc; /* Add a border */
+    border-radius: 8px; /* Rounded corners */
+    background-color: #f9f9f9; /* Light background color */
+}
+
+div {
+    margin-bottom: 15px; /* Space between form elements */
+}
+
+label {
+    display: block; /* Block display for labels */
+    margin-bottom: 5px; /* Space between label and input */
+    font-weight: bold; /* Bold labels */
+}
+
+input[type="text"],
+input[type="date"],
+input[type="email"],
+select,
+textarea {
+    width: 100%; /* Full width */
+    padding: 10px; /* Add padding */
+    border: 1px solid #ccc; /* Border for inputs */
+    border-radius: 4px; /* Rounded corners */
+    box-sizing: border-box; /* Include padding in total width */
+}
+
+textarea {
+    height: 100px; /* Set height for textarea */
+    resize: vertical; /* Allow vertical resizing */
+}
+
+button {
+    padding: 10px 15px; /* Button padding */
+    background-color: #28a745; /* Button background color */
+    color: white; /* Button text color */
+    border: none; /* Remove border */
+    border-radius: 4px; /* Rounded corners */
+    cursor: pointer; /* Pointer cursor on hover */
+}
+
+button:hover {
+    background-color: #218838; /* Darker green on hover */
+}
