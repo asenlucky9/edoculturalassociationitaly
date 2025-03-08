@@ -133,35 +133,64 @@
 }
 
 .join-us {
-  background-color: var(--primary-color);
-  color: white;
-  padding: 4rem 0;
-  margin: 0 -2rem;
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+  padding: 5rem 0;
   text-align: center;
+  color: white;
+  position: relative;
+  overflow: hidden;
+}
+
+.join-us::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, rgba(255,255,255,0.1) 25%, transparent 25%, transparent 50%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.1) 75%, transparent 75%, transparent);
+  background-size: 10px 10px;
+  opacity: 0.1;
 }
 
 .join-content {
+  position: relative;
+  z-index: 1;
   max-width: 600px;
   margin: 0 auto;
-  padding: 0 2rem;
+  padding: 0 1rem;
 }
 
 .join-content h2 {
+  font-size: 2.5rem;
+  font-weight: 700;
   margin-bottom: 1rem;
+  color: white;
 }
 
 .join-content p {
+  font-size: 1.2rem;
   margin-bottom: 2rem;
+  opacity: 0.9;
 }
 
 .join-content .btn {
-  background-color: white;
+  padding: 1rem 2.5rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  background: white;
   color: var(--primary-color);
-  font-weight: bold;
+  border: none;
+  transition: all 0.3s ease;
 }
 
 .join-content .btn:hover {
-  background-color: #f0f0f0;
+  transform: translateY(-3px);
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+  background: var(--accent-color);
+  color: white;
 }
 
 @media (max-width: 768px) {
@@ -187,6 +216,23 @@
   .president-image {
     width: 200px;
     height: 200px;
+  }
+
+  .join-us {
+    padding: 4rem 0;
+  }
+
+  .join-content h2 {
+    font-size: 2rem;
+  }
+
+  .join-content p {
+    font-size: 1rem;
+  }
+
+  .join-content .btn {
+    padding: 0.875rem 2rem;
+    font-size: 1rem;
   }
 }
 
@@ -326,5 +372,103 @@
 
   .event-card {
     margin-bottom: 1.5rem;
+  }
+}
+
+/* Support Us Section */
+.support-us {
+  padding: 6rem 0;
+  background: #f8f9fa;
+}
+
+.support-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+  text-align: center;
+}
+
+.support-content h2 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  color: var(--primary-color);
+}
+
+.support-content > p {
+  font-size: 1.2rem;
+  margin-bottom: 3rem;
+  color: #666;
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.support-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+.support-card {
+  background: white;
+  padding: 2.5rem 2rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+}
+
+.support-card:hover {
+  transform: translateY(-5px);
+}
+
+.support-card i {
+  font-size: 2.5rem;
+  color: var(--primary-color);
+  margin-bottom: 1.5rem;
+}
+
+.support-card h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: var(--primary-color);
+}
+
+.support-card p {
+  color: #666;
+  margin-bottom: 1.5rem;
+  line-height: 1.6;
+}
+
+.support-card .btn {
+  padding: 0.75rem 1.5rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  transition: all 0.3s ease;
+}
+
+.support-card .btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+@media (max-width: 768px) {
+  .support-us {
+    padding: 4rem 0;
+  }
+
+  .support-content h2 {
+    font-size: 2rem;
+  }
+
+  .support-content > p {
+    font-size: 1rem;
+  }
+
+  .support-card {
+    padding: 2rem 1.5rem;
   }
 } 

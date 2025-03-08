@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
-import { Navbar, Nav, Container, Row, Col, Button, Card, Carousel, NavDropdown } from 'react-bootstrap';
+import { Navbar, Nav, Container, Row, Col, Button, NavDropdown } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
 import Logo from './components/Logo';
@@ -10,9 +10,19 @@ import Events from './components/pages/Events';
 import Gallery from './components/pages/Gallery';
 import Membership from './components/pages/Membership';
 import Contact from './components/pages/Contact';
+import Donate from './components/pages/Donate';
 import AdminLogin from './components/admin/AdminLogin';
 import AdminDashboard from './components/admin/AdminDashboard';
 import { MemberProvider, useMemberCount } from './context/MemberContext';
+import HeroSection from './components/HeroSection';
+import MembershipManagement from './components/admin/MembershipManagement';
+import EventsManagement from './components/admin/EventsManagement';
+import GalleryManagement from './components/admin/GalleryManagement';
+import MeetingsManagement from './components/admin/MeetingsManagement';
+import { SharedProvider } from './context/SharedContext';
+import Partnership from './components/pages/Partnership';
+import PartnershipManagement from './components/admin/PartnershipManagement';
+import { LoadingAnimation } from './components/LottieAnimations';
 
 const ProtectedRoute = ({ children }) => {
   const isAuthenticated = localStorage.getItem('adminAuthenticated') === 'true';
@@ -29,7 +39,10 @@ const PublicNavbar = ({ scrolled }) => {
       <Container>
         <Navbar.Brand as={Link} to="/" className="d-flex align-items-center">
           <Logo />
-          <span className="ms-2 d-none d-sm-inline">Edo Cultural Association</span>
+          <span className="ms-2 brand-text">
+            Edo Cultural Association
+            <small className="d-block text-gradient">Udine, Italy</small>
+          </span>
         </Navbar.Brand>
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
         <Navbar.Collapse id="basic-navbar-nav">
@@ -58,13 +71,20 @@ const AdminNavbar = () => {
     navigate('/');
   };
 
-  return (
+    return (
     <Navbar bg="dark" variant="dark" expand="lg" fixed="top">
       <Container>
         <Navbar.Brand as={Link} to="/admin/dashboard">Admin Dashboard</Navbar.Brand>
         <Navbar.Toggle aria-controls="admin-navbar-nav" />
         <Navbar.Collapse id="admin-navbar-nav">
-          <Nav className="ms-auto">
+          <Nav className="me-auto">
+            <Nav.Link as={Link} to="/admin/membership">Membership</Nav.Link>
+            <Nav.Link as={Link} to="/admin/events">Events</Nav.Link>
+            <Nav.Link as={Link} to="/admin/gallery">Gallery</Nav.Link>
+            <Nav.Link as={Link} to="/admin/partnerships">Partnerships</Nav.Link>
+            <Nav.Link as={Link} to="/admin/meetings">Meetings</Nav.Link>
+          </Nav>
+          <Nav>
             <Nav.Link onClick={handleLogout}>Logout</Nav.Link>
           </Nav>
         </Navbar.Collapse>
@@ -76,7 +96,7 @@ const AdminNavbar = () => {
 const Footer = () => {
   const { memberCount } = useMemberCount();
 
-  return (
+    return (
     <footer className="bg-dark text-light py-5">
       <Container>
         <Row className="g-4">
@@ -105,17 +125,25 @@ const Footer = () => {
           <Col md={4}>
             <h5 className="fw-bold mb-4">Connect With Us</h5>
             <div className="social-links">
-              <a href="#" className="text-muted me-3 fs-4 hover-light"><i className="fab fa-facebook"></i></a>
-              <a href="#" className="text-muted me-3 fs-4 hover-light"><i className="fab fa-instagram"></i></a>
-              <a href="#" className="text-muted me-3 fs-4 hover-light"><i className="fab fa-twitter"></i></a>
-              <a href="#" className="text-muted fs-4 hover-light"><i className="fab fa-youtube"></i></a>
+              <a href="https://facebook.com/edoculturalitaly" target="_blank" rel="noopener noreferrer" className="hover-light">
+                <i className="fab fa-facebook-f"></i>
+              </a>
+              <a href="https://twitter.com/edoculturalitaly" target="_blank" rel="noopener noreferrer" className="hover-light">
+                <i className="fab fa-twitter"></i>
+              </a>
+              <a href="https://instagram.com/edoculturalitaly" target="_blank" rel="noopener noreferrer" className="hover-light">
+                <i className="fab fa-instagram"></i>
+              </a>
+              <a href="https://linkedin.com/company/edoculturalitaly" target="_blank" rel="noopener noreferrer" className="hover-light">
+                <i className="fab fa-linkedin-in"></i>
+              </a>
             </div>
             <div className="mt-4">
               <h6 className="fw-bold mb-3">Newsletter</h6>
               <div className="input-group">
                 <input type="email" className="form-control bg-dark text-light border-secondary" placeholder="Enter your email" />
                 <Button variant="primary">Subscribe</Button>
-              </div>
+            </div>
             </div>
           </Col>
         </Row>
@@ -142,6 +170,7 @@ const AppContent = () => {
   const location = useLocation();
   const isAdminPage = location.pathname.startsWith('/admin');
   const isHomePage = location.pathname === '/';
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -154,68 +183,95 @@ const AppContent = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  useEffect(() => {
+    // Simulate initial loading
+    setTimeout(() => {
+      setLoading(false);
+    }, 2000);
+  }, []);
+
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  return (
+    return (
     <div className="App">
       {/* Navigation */}
       {isAdminPage ? <AdminNavbar /> : <PublicNavbar scrolled={scrolled} />}
 
-      {/* Hero Section - Only show on home page */}
-      {isHomePage && (
-        <Carousel className="hero-section" controls={false} indicators={false}>
-          <Carousel.Item>
-            <div className="hero-content">
-              <Container>
-                <Row className="align-items-center min-vh-100">
-                  <Col lg={6} className="text-start">
-                    <h1 className="display-4 fw-bold mb-4">Welcome to Edo Cultural Association Italy</h1>
-                    <p className="lead mb-4">Preserving and promoting Edo culture in Italy through education, events, and community engagement.</p>
-                    <div className="d-flex gap-3">
-                      <Button variant="primary" size="lg" className="px-4 py-2">
-                        Join Us <i className="fas fa-arrow-right ms-2"></i>
-                      </Button>
-                      <Button variant="outline-light" size="lg" className="px-4 py-2">
-                        Learn More
-                      </Button>
-                    </div>
-                  </Col>
-                  <Col lg={6} className="d-none d-lg-block">
-                    <div className="hero-image-container">
-                      <img src="/path-to-your-hero-image.jpg" alt="Edo Culture" className="img-fluid rounded-3 shadow-lg" />
-                    </div>
-                  </Col>
-                </Row>
-              </Container>
-            </div>
-          </Carousel.Item>
-        </Carousel>
-      )}
-
       {/* Main Content */}
       <main className={`py-5 ${!isHomePage ? 'content-without-hero' : ''} ${isAdminPage ? 'admin-content' : ''}`}>
-        <Routes>
-          {/* Public Routes */}
-          <Route path="/" element={<Home />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/events" element={<Events />} />
-          <Route path="/gallery" element={<Gallery />} />
-          <Route path="/membership" element={<Membership />} />
-          <Route path="/contact" element={<Contact />} />
-          
-          {/* Admin Routes */}
-          <Route path="/admin" element={<AdminLogin />} />
-          <Route
-            path="/admin/dashboard"
-            element={
-              <ProtectedRoute>
-                <AdminDashboard />
-              </ProtectedRoute>
-            }
-          />
-        </Routes>
+        {loading ? (
+          <LoadingAnimation />
+        ) : (
+          <Routes>
+            {/* Public Routes */}
+            <Route path="/" element={
+              <>
+                <HeroSection />
+                <Home />
+              </>
+            } />
+            <Route path="/about" element={<About />} />
+            <Route path="/events" element={<Events />} />
+            <Route path="/gallery" element={<Gallery />} />
+            <Route path="/membership" element={<Membership />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/donate" element={<Donate />} />
+            <Route path="/partnership" element={<Partnership />} />
+            
+            {/* Admin Routes */}
+            <Route path="/admin" element={<AdminLogin />} />
+            <Route
+              path="/admin/dashboard"
+              element={
+                <ProtectedRoute>
+                  <AdminDashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/membership"
+              element={
+                <ProtectedRoute>
+                  <MembershipManagement />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/events"
+              element={
+                <ProtectedRoute>
+                  <EventsManagement />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/gallery"
+              element={
+                <ProtectedRoute>
+                  <GalleryManagement />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/partnerships"
+              element={
+                <ProtectedRoute>
+                  <PartnershipManagement />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/meetings"
+              element={
+                <ProtectedRoute>
+                  <MeetingsManagement />
+                </ProtectedRoute>
+              }
+            />
+          </Routes>
+        )}
       </main>
 
       {/* Footer - Only show on public pages */}
@@ -231,18 +287,20 @@ const AppContent = () => {
           <i className="fas fa-arrow-up"></i>
         </Button>
       )}
-    </div>
-  );
+            </div>
+    );
 };
 
 const App = () => {
-  return (
-    <MemberProvider>
-      <Router>
-        <AppContent />
-      </Router>
-    </MemberProvider>
-  );
+    return (
+    <SharedProvider>
+      <MemberProvider>
+            <Router>
+          <AppContent />
+            </Router>
+      </MemberProvider>
+    </SharedProvider>
+    );
 };
 
 export default App;

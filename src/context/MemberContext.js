@@ -1,92 +1,59 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 
 const MemberContext = createContext();
 
 export const MemberProvider = ({ children }) => {
-  const [memberCount, setMemberCount] = useState(0);
-  const [applications, setApplications] = useState([]);
+  const [members, setMembers] = useState(() => {
+    const savedMembers = localStorage.getItem('members');
+    return savedMembers ? JSON.parse(savedMembers) : [];
+  });
 
-  // Load member count and applications from localStorage on initial render
   useEffect(() => {
-    const count = localStorage.getItem('memberCount');
-    const savedApplications = localStorage.getItem('memberApplications');
-    
-    if (count) {
-      setMemberCount(parseInt(count));
-    }
-    if (savedApplications) {
-      setApplications(JSON.parse(savedApplications));
-    }
-  }, []);
+    localStorage.setItem('members', JSON.stringify(members));
+  }, [members]);
 
-  // Update member count
-  const updateMemberCount = (count) => {
-    setMemberCount(count);
-    localStorage.setItem('memberCount', count.toString());
+  const addMember = (member) => {
+    setMembers(prevMembers => [...prevMembers, { ...member, id: Date.now() }]);
   };
 
-  // Add new application
-  const addApplication = (application) => {
-    const newApplication = {
-      ...application,
-      id: Date.now(),
-      status: 'pending',
-      applicationDate: new Date().toISOString()
-    };
-    const updatedApplications = [...applications, newApplication];
-    setApplications(updatedApplications);
-    localStorage.setItem('memberApplications', JSON.stringify(updatedApplications));
-    return newApplication.id;
+  const updateMemberStatus = (id, newStatus) => {
+    setMembers(prevMembers =>
+      prevMembers.map(member =>
+        member.id === id ? { ...member, status: newStatus } : member
+      )
+    );
   };
 
-  // Approve application
-  const approveApplication = (applicationId) => {
-    const updatedApplications = applications.map(app => {
-      if (app.id === applicationId) {
-        return { ...app, status: 'approved', approvalDate: new Date().toISOString() };
-      }
-      return app;
-    });
-    setApplications(updatedApplications);
-    localStorage.setItem('memberApplications', JSON.stringify(updatedApplications));
-    updateMemberCount(memberCount + 1);
+  const deleteMember = (id) => {
+    setMembers(prevMembers => prevMembers.filter(member => member.id !== id));
   };
 
-  // Reject application
-  const rejectApplication = (applicationId) => {
-    const updatedApplications = applications.map(app => {
-      if (app.id === applicationId) {
-        return { ...app, status: 'rejected', rejectionDate: new Date().toISOString() };
-      }
-      return app;
-    });
-    setApplications(updatedApplications);
-    localStorage.setItem('memberApplications', JSON.stringify(updatedApplications));
-  };
-
-  // Get applications by status
-  const getApplicationsByStatus = (status) => {
-    return applications.filter(app => app.status === status);
-  };
+  const memberCount = members.filter(member => member.status === 'approved').length;
 
   return (
-    <MemberContext.Provider value={{ 
-      memberCount, 
-      applications,
-      addApplication,
-      approveApplication,
-      rejectApplication,
-      getApplicationsByStatus
+    <MemberContext.Provider value={{
+      members,
+      addMember,
+      updateMemberStatus,
+      deleteMember,
+      memberCount
     }}>
       {children}
     </MemberContext.Provider>
   );
 };
 
-export const useMemberCount = () => {
+export const useMemberContext = () => {
   const context = useContext(MemberContext);
   if (!context) {
-    throw new Error('useMemberCount must be used within a MemberProvider');
+    throw new Error('useMemberContext must be used within a MemberProvider');
   }
   return context;
-}; 
+};
+
+export const useMemberCount = () => {
+  const { memberCount } = useMemberContext();
+  return { memberCount };
+};
+
+export default MemberContext; 

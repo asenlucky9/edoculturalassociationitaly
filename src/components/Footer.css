@@ -1,16 +1,67 @@
 .footer {
-  background-color: var(--primary-color);
+  background-color: #1a1a1a;
   color: white;
-  padding: 4rem 2rem 2rem;
-  margin-top: 4rem;
+  padding: 2rem 0;
+  position: relative;
+  overflow: hidden;
 }
 
 .footer-content {
   max-width: 1200px;
   margin: 0 auto;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 3rem;
+  padding: 0 1rem;
+}
+
+.animated-text-container {
+  width: 100%;
+  overflow: hidden;
+  background: linear-gradient(90deg, #1a1a1a, #333, #1a1a1a);
+  padding: 1rem 0;
+  margin-top: 2rem;
+}
+
+.animated-text {
+  white-space: nowrap;
+  animation: scrollText 20s linear infinite;
+  color: #fff;
+  font-size: 1.2rem;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+  letter-spacing: 2px;
+}
+
+@keyframes scrollText {
+  0% {
+    transform: translateX(100%);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+/* Add a hover effect to pause the animation */
+.animated-text-container:hover .animated-text {
+  animation-play-state: paused;
+}
+
+/* Add a gradient overlay for smooth edges */
+.animated-text-container::before,
+.animated-text-container::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  width: 50px;
+  height: 100%;
+  z-index: 2;
+}
+
+.animated-text-container::before {
+  left: 0;
+  background: linear-gradient(to right, #1a1a1a, transparent);
+}
+
+.animated-text-container::after {
+  right: 0;
+  background: linear-gradient(to left, #1a1a1a, transparent);
 }
 
 .footer-section h3 {

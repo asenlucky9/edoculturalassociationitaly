@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import './AdminDashboard.css';
 import { Container, Row, Col, Table, Button, Badge, Tabs, Tab, Card, Form, Modal } from 'react-bootstrap';
 import { useMemberCount } from '../../context/MemberContext';
@@ -391,303 +391,87 @@ const AdminDashboard = () => {
   };
 
   return (
-    <Container fluid className="py-4">
-      <Row className="mb-4">
-        <Col>
-          <h2>Admin Dashboard</h2>
-        </Col>
-        <Col xs="auto">
-          <Button variant="outline-danger" onClick={handleLogout}>
-            Logout
-          </Button>
-        </Col>
-      </Row>
+    <Container className="py-5">
+      <div className="admin-section">
+        <h2 className="admin-section-title">
+          <i className="fas fa-tachometer-alt"></i>
+          Dashboard Overview
+        </h2>
+        
+        <div className="admin-grid">
+          {/* Membership Management */}
+          <Link to="/admin/membership" className="management-link">
+            <h3 className="management-title">
+              <i className="fas fa-users me-2"></i>
+              Membership Management
+            </h3>
+            <p className="management-description">
+              Manage member registrations, approvals, and member information
+            </p>
+          </Link>
 
-      <Tabs
-        activeKey={activeMainTab}
-        onSelect={(k) => setActiveMainTab(k)}
-        className="mb-4"
-      >
-        {/* Membership Management Tab */}
-        <Tab eventKey="membership" title="Membership Management">
-          <Row className="mb-4">
-            <Col md={4}>
-              <Card className="h-100">
-                <Card.Body>
-                  <Card.Title>Pending Applications</Card.Title>
-                  <Card.Text className="display-4">
-                    {getApplicationsByStatus('pending').length}
-                  </Card.Text>
-                </Card.Body>
-              </Card>
-            </Col>
-            <Col md={4}>
-              <Card className="h-100">
-                <Card.Body>
-                  <Card.Title>Approved Members</Card.Title>
-                  <Card.Text className="display-4">
-                    {getApplicationsByStatus('approved').length}
-                  </Card.Text>
-                </Card.Body>
-              </Card>
-            </Col>
-            <Col md={4}>
-              <Card className="h-100">
-                <Card.Body>
-                  <Card.Title>Rejected Applications</Card.Title>
-                  <Card.Text className="display-4">
-                    {getApplicationsByStatus('rejected').length}
-                  </Card.Text>
-                </Card.Body>
-              </Card>
-            </Col>
-          </Row>
-          <Tabs
-            activeKey={activeMembershipTab}
-            onSelect={(k) => setActiveMembershipTab(k)}
-            className="mb-3"
-          >
-            <Tab eventKey="pending" title="Pending Applications">
-              {renderMembershipApplications('pending')}
-            </Tab>
-            <Tab eventKey="approved" title="Approved Members">
-              {renderMembershipApplications('approved')}
-            </Tab>
-            <Tab eventKey="rejected" title="Rejected Applications">
-              {renderMembershipApplications('rejected')}
-            </Tab>
-          </Tabs>
-        </Tab>
+          {/* Events Management */}
+          <Link to="/admin/events" className="management-link">
+            <h3 className="management-title">
+              <i className="fas fa-calendar-alt me-2"></i>
+              Events Management
+            </h3>
+            <p className="management-description">
+              Create and manage cultural events, workshops, and gatherings
+            </p>
+          </Link>
 
-        {/* Events Management Tab */}
-        <Tab eventKey="events" title="Events Management">
-          <Row>
-            <Col md={4}>
-              <Card className="mb-4">
-                <Card.Body>
-                  <Card.Title>Add New Event</Card.Title>
-                  <Form onSubmit={handleAddEvent}>
-                    <Form.Group className="mb-3">
-                      <Form.Label>Event Title</Form.Label>
-                      <Form.Control
-                        type="text"
-                        value={newEvent.title}
-                        onChange={(e) => setNewEvent({...newEvent, title: e.target.value})}
-                        required
-                      />
-                    </Form.Group>
-                    <Form.Group className="mb-3">
-                      <Form.Label>Date</Form.Label>
-                      <Form.Control
-                        type="date"
-                        value={newEvent.date}
-                        onChange={(e) => setNewEvent({...newEvent, date: e.target.value})}
-                        required
-                      />
-                    </Form.Group>
-                    <Form.Group className="mb-3">
-                      <Form.Label>Time</Form.Label>
-                      <Form.Control
-                        type="time"
-                        value={newEvent.time}
-                        onChange={(e) => setNewEvent({...newEvent, time: e.target.value})}
-                        required
-                      />
-                    </Form.Group>
-                    <Form.Group className="mb-3">
-                      <Form.Label>Location</Form.Label>
-                      <Form.Control
-                        type="text"
-                        value={newEvent.location}
-                        onChange={(e) => setNewEvent({...newEvent, location: e.target.value})}
-                        required
-                      />
-                    </Form.Group>
-                    <Form.Group className="mb-3">
-                      <Form.Label>Description</Form.Label>
-                      <Form.Control
-                        as="textarea"
-                        rows={3}
-                        value={newEvent.description}
-                        onChange={(e) => setNewEvent({...newEvent, description: e.target.value})}
-                        required
-                      />
-                    </Form.Group>
-                    <Form.Group className="mb-3">
-                      <Form.Label>Event Image</Form.Label>
-                      <Form.Control
-                        type="file"
-                        accept="image/*"
-                        onChange={handleEventImageUpload}
-                      />
-                    </Form.Group>
-                    <Button type="submit" variant="primary">Add Event</Button>
-                  </Form>
-                </Card.Body>
-              </Card>
-            </Col>
-            <Col md={8}>
-              <h3>Upcoming Events</h3>
-              <Table responsive striped hover>
-                <thead>
-                  <tr>
-                    <th>Title</th>
-                    <th>Date</th>
-                    <th>Time</th>
-                    <th>Location</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {events.map(event => (
-                    <tr key={event.id}>
-                      <td>{event.title}</td>
-                      <td>{event.date}</td>
-                      <td>{event.time}</td>
-                      <td>{event.location}</td>
-                      <td>
-                        <Button
-                          variant="danger"
-                          size="sm"
-                          onClick={() => handleDeleteEvent(event.id)}
-                        >
-                          Delete
-                        </Button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </Table>
-            </Col>
-          </Row>
-        </Tab>
+          {/* Gallery Management */}
+          <Link to="/admin/gallery" className="management-link">
+            <h3 className="management-title">
+              <i className="fas fa-images me-2"></i>
+              Gallery Management
+            </h3>
+            <p className="management-description">
+              Upload and organize photos from events and cultural activities
+            </p>
+          </Link>
 
-        {/* Gallery Management Tab */}
-        <Tab eventKey="gallery" title="Gallery Management">
-          <Row>
-            <Col md={4}>
-              <Card className="mb-4">
-                <Card.Body>
-                  <Card.Title>Upload New Image</Card.Title>
-                  <Form.Group>
-                    <Form.Label>Select Image</Form.Label>
-                    <Form.Control
-                      type="file"
-                      accept="image/*"
-                      onChange={handleImageUpload}
-                    />
-                  </Form.Group>
-                </Card.Body>
-              </Card>
-            </Col>
-            <Col md={8}>
-              <Row>
-                {gallery.map(image => (
-                  <Col md={4} key={image.id} className="mb-4">
-                    <Card>
-                      <Card.Img variant="top" src={image.url} />
-                      <Card.Body>
-                        <Card.Title>{image.caption}</Card.Title>
-                        <Button
-                          variant="danger"
-                          size="sm"
-                          onClick={() => handleDeleteImage(image.id)}
-                        >
-                          Delete
-                        </Button>
-                      </Card.Body>
-                    </Card>
-                  </Col>
-                ))}
-              </Row>
-            </Col>
-          </Row>
-        </Tab>
+          {/* Meetings & Attendance */}
+          <Link to="/admin/meetings" className="management-link">
+            <h3 className="management-title">
+              <i className="fas fa-clipboard-list me-2"></i>
+              Meetings & Attendance
+            </h3>
+            <p className="management-description">
+              Track meeting schedules and member attendance
+            </p>
+          </Link>
+        </div>
+      </div>
 
-        {/* Meetings & Attendance Tab */}
-        <Tab eventKey="meetings" title="Meetings & Attendance">
-          <Row>
-            <Col md={4}>
-              <Card className="mb-4">
-                <Card.Body>
-                  <Card.Title>Schedule New Meeting</Card.Title>
-                  <Form onSubmit={handleAddMeeting}>
-                    <Form.Group className="mb-3">
-                      <Form.Label>Meeting Title</Form.Label>
-                      <Form.Control
-                        type="text"
-                        value={newMeeting.title}
-                        onChange={(e) => setNewMeeting({...newMeeting, title: e.target.value})}
-                        required
-                      />
-                    </Form.Group>
-                    <Form.Group className="mb-3">
-                      <Form.Label>Date</Form.Label>
-                      <Form.Control
-                        type="date"
-                        value={newMeeting.date}
-                        onChange={(e) => setNewMeeting({...newMeeting, date: e.target.value})}
-                        required
-                      />
-                    </Form.Group>
-                    <Form.Group className="mb-3">
-                      <Form.Label>Time</Form.Label>
-                      <Form.Control
-                        type="time"
-                        value={newMeeting.time}
-                        onChange={(e) => setNewMeeting({...newMeeting, time: e.target.value})}
-                        required
-                      />
-                    </Form.Group>
-                    <Button type="submit" variant="primary">Schedule Meeting</Button>
-                  </Form>
-                </Card.Body>
-              </Card>
-            </Col>
-            <Col md={8}>
-              <h3>Scheduled Meetings</h3>
-              <Table responsive striped hover>
-                <thead>
-                  <tr>
-                    <th>Title</th>
-                    <th>Date</th>
-                    <th>Time</th>
-                    <th>Attendees</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {meetings.map(meeting => (
-                    <tr key={meeting.id}>
-                      <td>{meeting.title}</td>
-                      <td>{meeting.date}</td>
-                      <td>{meeting.time}</td>
-                      <td>{meeting.attendees?.length || 0}</td>
-                      <td>
-                        <Button
-                          variant="primary"
-                          size="sm"
-                          className="me-2"
-                          onClick={() => {/* Handle view attendance */}}
-                        >
-                          View Attendance
-                        </Button>
-                        <Button
-                          variant="danger"
-                          size="sm"
-                          onClick={() => {/* Handle delete meeting */}}
-                        >
-                          Delete
-                        </Button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </Table>
-            </Col>
-          </Row>
-        </Tab>
-      </Tabs>
+      {/* Applications Section */}
+      <div className="admin-section applications-section">
+        <h2 className="admin-section-title">
+          <i className="fas fa-clipboard-check"></i>
+          Application Status
+        </h2>
+        
+        <div className="applications-grid">
+          {/* Pending Applications */}
+          <div className="application-stat-card">
+            <div className="application-count status-pending">12</div>
+            <div className="application-label">Pending Applications</div>
+          </div>
+
+          {/* Approved Members */}
+          <div className="application-stat-card">
+            <div className="application-count status-approved">45</div>
+            <div className="application-label">Approved Members</div>
+          </div>
+
+          {/* Rejected Applications */}
+          <div className="application-stat-card">
+            <div className="application-count status-rejected">3</div>
+            <div className="application-label">Rejected Applications</div>
+          </div>
+        </div>
+      </div>
     </Container>
   );
 };

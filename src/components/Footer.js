@@ -43,6 +43,11 @@ const Footer = () => {
       <div className="footer-bottom">
         <p>&copy; {new Date().getFullYear()} Edo Cultural Association Italy. All rights reserved.</p>
       </div>
+      <div className="animated-text-container">
+        <div className="animated-text">
+          © 2025 Welcome to Edo Cultural Association Udine Italy
+        </div>
+      </div>
     </footer>
   );
 };

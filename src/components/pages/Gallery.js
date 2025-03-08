@@ -1,39 +1,41 @@
 import React from 'react';
+import { Container, Row, Col, Card } from 'react-bootstrap';
+import { useShared } from '../../context/SharedContext';
 import './Gallery.css';
 
 const Gallery = () => {
-  const images = [
-    {
-      id: 1,
-      title: 'Cultural Festival 2024',
-      description: 'Highlights from our annual festival',
-      url: '/images/festival.jpg',
-      date: '2024-03-15'
-    }
-  ];
+  const { gallery } = useShared();
 
   return (
-    <div className="gallery-page">
-      <div className="hero-section">
-        <h1>Gallery</h1>
-        <p>Capturing moments from our cultural events and activities</p>
-      </div>
-
-      <div className="content-section">
-        <div className="gallery-grid">
-          {images.map(image => (
-            <div key={image.id} className="gallery-item">
-              <img src={image.url} alt={image.title} />
-              <div className="gallery-item-info">
-                <h3>{image.title}</h3>
-                <p>{image.description}</p>
-                <span className="date">{new Date(image.date).toLocaleDateString()}</span>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
+    <Container className="py-5">
+      <h1 className="text-center mb-5">Our Gallery</h1>
+      <Row className="g-4">
+        {gallery.length > 0 ? (
+          gallery.map((item) => (
+            <Col key={item.id} md={4} lg={3}>
+              <Card className="gallery-card h-100">
+                <div className="gallery-image-container">
+                  <Card.Img
+                    variant="top"
+                    src={item.image}
+                    alt={item.title}
+                    className="gallery-image"
+                  />
+                </div>
+                <Card.Body>
+                  <Card.Title className="h5">{item.title}</Card.Title>
+                  <Card.Text className="text-muted">{item.description}</Card.Text>
+                </Card.Body>
+              </Card>
+            </Col>
+          ))
+        ) : (
+          <Col>
+            <p className="text-center text-muted">No images in the gallery yet.</p>
+          </Col>
+        )}
+      </Row>
+    </Container>
   );
 };
 
