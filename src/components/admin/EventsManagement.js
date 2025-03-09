@@ -3,7 +3,7 @@ import { Container, Row, Col, Card, Form, Button, Image } from 'react-bootstrap'
 import { useShared } from '../../context/SharedContext';
 
 const EventsManagement = () => {
-  const { events, addEvent, updateEvent, deleteEvent } = useShared();
+  const { events, addEvent, deleteEvent } = useShared();
   const [newEvent, setNewEvent] = useState({
     title: '',
     date: '',

@@ -1,7 +1,6 @@
 import React, { useEffect } from 'react';
 import { Container, Row, Col, Button } from 'react-bootstrap';
 import 'animate.css';
-import { WelcomeAnimation } from './LottieAnimations';
 import { useMemberCount } from '../context/MemberContext';
 
 const HeroSection = () => {
