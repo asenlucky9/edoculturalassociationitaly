@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Container, Form, Button, Alert } from 'react-bootstrap';
+import { Container, Form, Button, Alert, Row, Col, Card } from 'react-bootstrap';
 import { useMemberContext } from '../../context/MemberContext';
 
 const Membership = () => {
@@ -7,21 +7,41 @@ const Membership = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const [formData, setFormData] = useState({
-    name: '',
     surname: '',
-    email: '',
-    phone: '',
+    name: '',
+    otherName: '',
+    homeAddress: '',
     dob: '',
-    address: '',
-    occupation: '',
-    interests: ''
+    townCity: '',
+    localGovt: '',
+    country: '',
+    passportId: '',
+    codiceFiscale: '',
+    phone: '',
+    nextOfKinName: '',
+    nextOfKinPhone: '',
+    nextOfKinAddress: '',
+    nextOfKinCity: '',
+    nextOfKinCountry: '',
+    isMarried: false,
+    partnerName: '',
+    childrenCount: '',
+    childrenNames: '',
+    parentsStatus: '',
+    association: '',
+    criminalRecord: false,
+    reason: '',
+    agreement: false,
+    passportPhoto: null
   });
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
+    const { name, value, type, checked, files } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: value
+      [name]: type === 'checkbox' ? checked : 
+              type === 'file' ? files[0] : 
+              value
     }));
   };
 
@@ -31,51 +51,75 @@ const Membership = () => {
     setSuccess(false);
 
     try {
-      // Validate required fields
-      const requiredFields = ['name', 'surname', 'email', 'phone'];
-      const missingFields = requiredFields.filter(field => !formData[field]);
+      const requiredFields = [
+        'surname', 
+        'name', 
+        'homeAddress',
+        'country', 
+        'dob', 
+        'phone', 
+        'passportId',
+        'codiceFiscale',
+        'nextOfKinName',
+        'nextOfKinPhone',
+        'parentsStatus',
+        'reason'
+      ];
       
+      const missingFields = requiredFields.filter(field => !formData[field]);
       if (missingFields.length > 0) {
         throw new Error(`Please fill in all required fields: ${missingFields.join(', ')}`);
       }
 
-      // Validate email format
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(formData.email)) {
-        throw new Error('Please enter a valid email address');
+      if (!formData.agreement) {
+        throw new Error('You must agree to the terms and conditions');
       }
 
-      // Add status and submission date to the member data
-      const memberData = {
-        ...formData,
-        status: 'pending',
-        submittedAt: new Date().toISOString(),
-        id: Date.now()
-      };
+      if (!formData.passportPhoto) {
+        throw new Error('Please upload your passport photo');
+      }
 
-      // Add member using context
-      addMember(memberData);
+      addMember(formData);
       
-      // Clear form and show success message
       setFormData({
-        name: '',
         surname: '',
-        email: '',
-        phone: '',
+        name: '',
+        otherName: '',
+        homeAddress: '',
         dob: '',
-        address: '',
-        occupation: '',
-        interests: ''
+        townCity: '',
+        localGovt: '',
+        country: '',
+        passportId: '',
+        codiceFiscale: '',
+        phone: '',
+        nextOfKinName: '',
+        nextOfKinPhone: '',
+        nextOfKinAddress: '',
+        nextOfKinCity: '',
+        nextOfKinCountry: '',
+        isMarried: false,
+        partnerName: '',
+        childrenCount: '',
+        childrenNames: '',
+        parentsStatus: '',
+        association: '',
+        criminalRecord: false,
+        reason: '',
+        agreement: false,
+        passportPhoto: null
       });
       setSuccess(true);
     } catch (err) {
-      setError(err.message || 'An error occurred while submitting your application. Please try again.');
+      setError(err.message || 'An error occurred while submitting your application.');
     }
   };
 
   return (
-    <Container className="py-5">
-      <h2 className="mb-4">Membership Registration</h2>
+    <Container className="py-4">
+      <Card className="shadow-sm">
+        <Card.Body className="p-3">
+          <h3 className="text-center mb-3">EDO Cultural Association Membership Registration</h3>
       
       {error && (
         <Alert variant="danger" onClose={() => setError('')} dismissible>
@@ -85,22 +129,18 @@ const Membership = () => {
       
       {success && (
         <Alert variant="success" onClose={() => setSuccess(false)} dismissible>
-          Your membership application has been submitted successfully! We will review it and get back to you soon.
+              Your membership application has been submitted successfully!
         </Alert>
       )}
 
-      <Form onSubmit={handleSubmit}>
-        <Form.Group className="mb-3">
-          <Form.Label>Name *</Form.Label>
-          <Form.Control
-            type="text"
-            name="name"
-            value={formData.name}
-            onChange={handleChange}
-            required
-          />
-        </Form.Group>
-
+          <Form onSubmit={handleSubmit} className="smaller-form">
+            <Card className="mb-3">
+              <Card.Header className="bg-primary text-white py-2">
+                <h6 className="mb-0">Personal Information</h6>
+              </Card.Header>
+              <Card.Body className="p-3">
+                <Row>
+                  <Col md={4}>
         <Form.Group className="mb-3">
           <Form.Label>Surname *</Form.Label>
           <Form.Control
@@ -111,20 +151,101 @@ const Membership = () => {
             required
           />
         </Form.Group>
+                  </Col>
+                  <Col md={4}>
+                    <Form.Group className="mb-3">
+                      <Form.Label>First Name *</Form.Label>
+                      <Form.Control
+                        type="text"
+                        name="name"
+                        value={formData.name}
+                        onChange={handleChange}
+                        required
+                      />
+                    </Form.Group>
+                  </Col>
+                  <Col md={4}>
+                    <Form.Group className="mb-3">
+                      <Form.Label>Other Names</Form.Label>
+                      <Form.Control
+                        type="text"
+                        name="otherName"
+                        value={formData.otherName}
+                        onChange={handleChange}
+                      />
+                    </Form.Group>
+                  </Col>
+                </Row>
 
+                <Row>
+                  <Col md={6}>
+                    <Form.Group className="mb-3">
+                      <Form.Label>Home Address *</Form.Label>
+                      <Form.Control
+                        type="text"
+                        name="homeAddress"
+                        value={formData.homeAddress}
+                        onChange={handleChange}
+                        required
+                      />
+                    </Form.Group>
+                  </Col>
+                  <Col md={3}>
         <Form.Group className="mb-3">
-          <Form.Label>Email *</Form.Label>
+                      <Form.Label>Date of Birth *</Form.Label>
           <Form.Control
-            type="email"
-            name="email"
-            value={formData.email}
+                        type="date"
+                        name="dob"
+                        value={formData.dob}
             onChange={handleChange}
             required
           />
         </Form.Group>
+                  </Col>
+                  <Col md={3}>
+                    <Form.Group className="mb-3">
+                      <Form.Label>Country of Residence *</Form.Label>
+                      <Form.Select
+                        name="country"
+                        value={formData.country}
+                        onChange={handleChange}
+                        required
+                      >
+                        <option value="">Select Country</option>
+                        <option value="Italy">Italy</option>
+                        <option value="Nigeria">Nigeria</option>
+                      </Form.Select>
+                    </Form.Group>
+                  </Col>
+                </Row>
 
+                <Row>
+                  <Col md={4}>
+                    <Form.Group className="mb-3">
+                      <Form.Label>Town/City *</Form.Label>
+                      <Form.Control
+                        type="text"
+                        name="townCity"
+                        value={formData.townCity}
+                        onChange={handleChange}
+                        required
+                      />
+                    </Form.Group>
+                  </Col>
+                  <Col md={4}>
+                    <Form.Group className="mb-3">
+                      <Form.Label>Local Government</Form.Label>
+                      <Form.Control
+                        type="text"
+                        name="localGovt"
+                        value={formData.localGovt}
+                        onChange={handleChange}
+                      />
+                    </Form.Group>
+                  </Col>
+                  <Col md={4}>
         <Form.Group className="mb-3">
-          <Form.Label>Phone *</Form.Label>
+                      <Form.Label>Phone Number *</Form.Label>
           <Form.Control
             type="tel"
             name="phone"
@@ -133,54 +254,317 @@ const Membership = () => {
             required
           />
         </Form.Group>
+                  </Col>
+                </Row>
 
+                <Row>
+                  <Col md={6}>
+                    <Form.Group className="mb-3">
+                      <Form.Label>Passport ID *</Form.Label>
+                      <Form.Control
+                        type="text"
+                        name="passportId"
+                        value={formData.passportId}
+                        onChange={handleChange}
+                        required
+                      />
+                    </Form.Group>
+                  </Col>
+                  <Col md={6}>
+                    <Form.Group className="mb-3">
+                      <Form.Label>Codice Fiscale *</Form.Label>
+                      <Form.Control
+                        type="text"
+                        name="codiceFiscale"
+                        value={formData.codiceFiscale}
+                        onChange={handleChange}
+                        required
+                      />
+                    </Form.Group>
+                  </Col>
+                </Row>
+              </Card.Body>
+            </Card>
+
+            <Card className="mb-3">
+              <Card.Header className="bg-primary text-white py-2">
+                <h6 className="mb-0">Next of Kin Information</h6>
+              </Card.Header>
+              <Card.Body className="p-3">
+                <Row>
+                  <Col md={6}>
+                    <Form.Group className="mb-3">
+                      <Form.Label>Next of Kin Name *</Form.Label>
+                      <Form.Control
+                        type="text"
+                        name="nextOfKinName"
+                        value={formData.nextOfKinName}
+                        onChange={handleChange}
+                        required
+                      />
+                    </Form.Group>
+                  </Col>
+                  <Col md={6}>
+                    <Form.Group className="mb-3">
+                      <Form.Label>Next of Kin Phone *</Form.Label>
+                      <Form.Control
+                        type="tel"
+                        name="nextOfKinPhone"
+                        value={formData.nextOfKinPhone}
+                        onChange={handleChange}
+                        required
+                      />
+                    </Form.Group>
+                  </Col>
+                </Row>
+
+                <Row>
+                  <Col md={6}>
+                    <Form.Group className="mb-3">
+                      <Form.Label>Next of Kin Address</Form.Label>
+                      <Form.Control
+                        type="text"
+                        name="nextOfKinAddress"
+                        value={formData.nextOfKinAddress}
+                        onChange={handleChange}
+                      />
+                    </Form.Group>
+                  </Col>
+                  <Col md={3}>
+                    <Form.Group className="mb-3">
+                      <Form.Label>Next of Kin City</Form.Label>
+                      <Form.Control
+                        type="text"
+                        name="nextOfKinCity"
+                        value={formData.nextOfKinCity}
+                        onChange={handleChange}
+                      />
+                    </Form.Group>
+                  </Col>
+                  <Col md={3}>
+                    <Form.Group className="mb-3">
+                      <Form.Label>Next of Kin Country</Form.Label>
+                      <Form.Select
+                        name="nextOfKinCountry"
+                        value={formData.nextOfKinCountry}
+                        onChange={handleChange}
+                      >
+                        <option value="">Select Country</option>
+                        <option value="Italy">Italy</option>
+                        <option value="Nigeria">Nigeria</option>
+                      </Form.Select>
+                    </Form.Group>
+                  </Col>
+                </Row>
+              </Card.Body>
+            </Card>
+
+            <Card className="mb-3">
+              <Card.Header className="bg-primary text-white py-2">
+                <h6 className="mb-0">Family Information</h6>
+              </Card.Header>
+              <Card.Body className="p-3">
+                <Row>
+                  <Col md={12}>
+                    <Form.Group className="mb-3">
+                      <Form.Check
+                        type="checkbox"
+                        label="Are you married?"
+                        name="isMarried"
+                        checked={formData.isMarried}
+                        onChange={handleChange}
+                      />
+                    </Form.Group>
+                  </Col>
+                </Row>
+
+                {formData.isMarried && (
+                  <Row>
+                    <Col md={12}>
         <Form.Group className="mb-3">
-          <Form.Label>Date of Birth</Form.Label>
+                        <Form.Label>Partner's Name</Form.Label>
           <Form.Control
-            type="date"
-            name="dob"
-            value={formData.dob}
+                          type="text"
+                          name="partnerName"
+                          value={formData.partnerName}
             onChange={handleChange}
           />
         </Form.Group>
+                    </Col>
+                  </Row>
+                )}
 
+                <Row>
+                  <Col md={6}>
+                    <Form.Group className="mb-3">
+                      <Form.Label>Number of Children</Form.Label>
+                      <Form.Control
+                        type="number"
+                        name="childrenCount"
+                        value={formData.childrenCount}
+                        onChange={handleChange}
+                        min="0"
+                      />
+                    </Form.Group>
+                  </Col>
+                  <Col md={6}>
+                    <Form.Group className="mb-3">
+                      <Form.Label>Parents Status *</Form.Label>
+                      <Form.Select
+                        name="parentsStatus"
+                        value={formData.parentsStatus}
+                        onChange={handleChange}
+                        required
+                      >
+                        <option value="">Select status</option>
+                        <option value="bothAlive">Both Alive</option>
+                        <option value="fatherDeceased">Father Deceased</option>
+                        <option value="motherDeceased">Mother Deceased</option>
+                        <option value="bothDeceased">Both Deceased</option>
+                      </Form.Select>
+                    </Form.Group>
+                  </Col>
+                </Row>
+
+                {formData.childrenCount > 0 && (
+                  <Row>
+                    <Col md={12}>
         <Form.Group className="mb-3">
-          <Form.Label>Address</Form.Label>
+                        <Form.Label>Children's Names (comma separated)</Form.Label>
           <Form.Control
-            as="textarea"
-            name="address"
-            value={formData.address}
+                          type="text"
+                          name="childrenNames"
+                          value={formData.childrenNames}
             onChange={handleChange}
-            rows={3}
+                          placeholder="e.g., John, Jane, Mary"
           />
         </Form.Group>
+                    </Col>
+                  </Row>
+                )}
+              </Card.Body>
+            </Card>
 
+            <Card className="mb-3">
+              <Card.Header className="bg-primary text-white py-2">
+                <h6 className="mb-0">Additional Information</h6>
+              </Card.Header>
+              <Card.Body className="p-3">
+                <Row>
+                  <Col md={12}>
         <Form.Group className="mb-3">
-          <Form.Label>Occupation</Form.Label>
+                      <Form.Label>Association Membership</Form.Label>
           <Form.Control
             type="text"
-            name="occupation"
-            value={formData.occupation}
+                        name="association"
+                        value={formData.association}
+                        onChange={handleChange}
+                        placeholder="List any other associations you belong to"
+                      />
+                    </Form.Group>
+                  </Col>
+                </Row>
+
+                <Row>
+                  <Col md={12}>
+                    <Form.Group className="mb-3">
+                      <Form.Check
+                        type="checkbox"
+                        label="Do you have any criminal record?"
+                        name="criminalRecord"
+                        checked={formData.criminalRecord}
             onChange={handleChange}
           />
         </Form.Group>
+                  </Col>
+                </Row>
 
+                <Row>
+                  <Col md={12}>
         <Form.Group className="mb-3">
-          <Form.Label>Interests</Form.Label>
+                      <Form.Label>Reason for Joining *</Form.Label>
           <Form.Control
             as="textarea"
-            name="interests"
-            value={formData.interests}
+                        rows={3}
+                        name="reason"
+                        value={formData.reason}
+                        onChange={handleChange}
+                        required
+                        placeholder="Why do you want to join the EDO Cultural Association?"
+                      />
+                    </Form.Group>
+                  </Col>
+                </Row>
+
+                <Row>
+                  <Col md={12}>
+                    <Form.Group className="mb-3">
+                      <Form.Label>Passport Photo *</Form.Label>
+                      <Form.Control
+                        type="file"
+                        name="passportPhoto"
+                        onChange={handleChange}
+                        accept="image/*"
+                        required
+                      />
+                      <Form.Text className="text-muted">
+                        Please upload a recent passport photograph
+                      </Form.Text>
+                    </Form.Group>
+                  </Col>
+                </Row>
+
+                <Row>
+                  <Col md={12}>
+                    <Form.Group className="mb-3">
+                      <Form.Check
+                        type="checkbox"
+                        id="agreement-checkbox"
+                        label={
+                          <span className="ms-1">
+                            I agree to the terms and conditions of the EDO Cultural Association *
+                          </span>
+                        }
+                        name="agreement"
+                        checked={formData.agreement}
             onChange={handleChange}
-            placeholder="Tell us about your interests in Edo culture..."
-            rows={3}
+                        required
+                        className="user-select-none"
           />
         </Form.Group>
+                  </Col>
+                </Row>
+              </Card.Body>
+            </Card>
 
-        <Button variant="primary" type="submit" className="mt-3">
+            <div className="text-center">
+              <Button variant="primary" type="submit" className="px-4 py-2">
           Submit Application
         </Button>
+            </div>
       </Form>
+        </Card.Body>
+      </Card>
+      <style jsx>{`
+        .smaller-form .form-group {
+          margin-bottom: 0.75rem !important;
+        }
+        .smaller-form .form-control {
+          padding: 0.375rem 0.75rem;
+          font-size: 0.9rem;
+        }
+        .smaller-form .form-label {
+          margin-bottom: 0.25rem;
+          font-size: 0.9rem;
+        }
+        .user-select-none {
+          user-select: none;
+          cursor: pointer;
+        }
+        .user-select-none label {
+          cursor: pointer;
+        }
+      `}</style>
     </Container>
   );
 };

@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { Container, Row, Col, Table, Button, Badge, Tabs, Tab, Form } from 'react-bootstrap';
+import { Container, Form, Button, Badge, Tabs, Tab, Card, ButtonGroup } from 'react-bootstrap';
 import { useMemberContext } from '../../context/MemberContext';
 
 const MembershipManagement = () => {
   const [activeTab, setActiveTab] = useState('pending');
   const [searchQuery, setSearchQuery] = useState('');
+  const [searchBy, setSearchBy] = useState('name');
   const { members, updateMemberStatus, deleteMember } = useMemberContext();
 
   const getApplicationsByStatus = (status) => {
@@ -14,11 +15,15 @@ const MembershipManagement = () => {
   const filteredApplications = (status) => {
     return getApplicationsByStatus(status).filter(app => {
       const searchLower = searchQuery.toLowerCase();
-      return (
-        app.name?.toLowerCase().includes(searchLower) ||
-        app.surname?.toLowerCase().includes(searchLower) ||
-        app.email?.toLowerCase().includes(searchLower)
-      );
+      if (searchBy === 'name') {
+        return (
+          app.name?.toLowerCase().includes(searchLower) ||
+          app.surname?.toLowerCase().includes(searchLower)
+        );
+      } else if (searchBy === 'phone') {
+        return app.phone?.includes(searchQuery);
+      }
+      return true;
     });
   };
 
@@ -41,92 +46,150 @@ const MembershipManagement = () => {
     return <Badge bg={variants[status]}>{status.toUpperCase()}</Badge>;
   };
 
-  const renderApplicationsTable = (status) => {
+  const renderMemberList = (status) => {
     const applications = filteredApplications(status);
     
     return (
-      <div className="admin-section">
-        <div className="d-flex justify-content-between align-items-center mb-4">
-          <h3 className="management-title mb-0">
-            {status.charAt(0).toUpperCase() + status.slice(1)} Applications
-          </h3>
-          <Form.Control
-            type="search"
-            placeholder="Search applications..."
-            className="w-auto"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
+      <div className="member-list-section">
+        <div className="search-section mb-4 p-3 bg-light rounded">
+          <h4 className="mb-3">Search Members</h4>
+          <div className="d-flex gap-3 align-items-center">
+            <Form.Group className="flex-grow-1">
+              <Form.Control
+                type="search"
+                placeholder={searchBy === 'name' ? "Search by name..." : "Search by phone number..."}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="search-input"
+              />
+            </Form.Group>
+            <Form.Group>
+              <Form.Select
+                value={searchBy}
+                onChange={(e) => setSearchBy(e.target.value)}
+                className="search-select"
+              >
+                <option value="name">Search by Name</option>
+                <option value="phone">Search by Phone</option>
+              </Form.Select>
+            </Form.Group>
+          </div>
         </div>
-        
-        <Table responsive striped hover>
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Email</th>
-              <th>Phone</th>
-              <th>Date of Birth</th>
-              <th>Application Date</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {applications.map((app) => (
-              <tr key={app.id}>
-                <td>{app.surname} {app.name}</td>
-                <td>{app.email}</td>
-                <td>{app.phone}</td>
-                <td>{app.dob}</td>
-                <td>{new Date(app.applicationDate).toLocaleDateString()}</td>
-                <td>
-                  {status === 'pending' ? (
-                    <>
+
+        <div className="members-grid">
+          {applications.map((member) => (
+            <Card key={member.id} className="member-card">
+              <Card.Body>
+                <div className="d-flex gap-3">
+                  <div className="member-photo-container">
+                    {member.passportPhoto ? (
+                      <img
+                        src={URL.createObjectURL(member.passportPhoto)}
+                        alt={`${member.surname} ${member.name}`}
+                        className="member-photo"
+                      />
+                    ) : (
+                      <div className="member-photo-placeholder">
+                        <i className="fas fa-user"></i>
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex-grow-1">
+                    <div className="d-flex justify-content-between align-items-start">
+                      <div>
+                        <h5 className="member-name">{member.surname} {member.name}</h5>
+                        <p className="member-info mb-1">
+                          <i className="fas fa-phone me-2"></i>
+                          {member.phone}
+                        </p>
+                        <p className="member-info mb-1">
+                          <i className="fas fa-envelope me-2"></i>
+                          {member.email}
+                        </p>
+                        <p className="member-info mb-1">
+                          <i className="fas fa-map-marker-alt me-2"></i>
+                          {member.homeAddress}
+                        </p>
+                        <p className="member-info">
+                          <i className="fas fa-calendar me-2"></i>
+                          DOB: {member.dob}
+                        </p>
+                      </div>
+                      {getStatusBadge(member.status)}
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="member-actions mt-3 pt-3 border-top">
+                  <ButtonGroup className="me-2">
+                    {status === 'pending' && (
+                      <>
+                        <Button
+                          variant="success"
+                          size="sm"
+                          onClick={() => handleStatusChange(member.id, 'approved')}
+                        >
+                          <i className="fas fa-check me-1"></i> Approve
+                        </Button>
+                        <Button
+                          variant="danger"
+                          size="sm"
+                          onClick={() => handleStatusChange(member.id, 'rejected')}
+                        >
+                          <i className="fas fa-times me-1"></i> Reject
+                        </Button>
+                      </>
+                    )}
+                    {status === 'rejected' && (
                       <Button
                         variant="success"
                         size="sm"
-                        className="me-2"
-                        onClick={() => updateMemberStatus(app.id, 'approved')}
+                        onClick={() => handleStatusChange(member.id, 'approved')}
                       >
-                        Approve
+                        <i className="fas fa-check me-1"></i> Approve
                       </Button>
+                    )}
+                    {status === 'approved' && (
                       <Button
-                        variant="danger"
+                        variant="warning"
                         size="sm"
-                        onClick={() => updateMemberStatus(app.id, 'rejected')}
+                        onClick={() => handleStatusChange(member.id, 'pending')}
                       >
-                        Reject
+                        <i className="fas fa-clock me-1"></i> Set Pending
                       </Button>
-                    </>
-                  ) : (
-                    <Badge bg={status === 'approved' ? 'success' : 'danger'}>
-                      {status}
-                    </Badge>
-                  )}
+                    )}
+                  </ButtonGroup>
                   <Button
                     variant="info"
                     size="sm"
-                    className="ms-2"
-                    onClick={() => window.alert(JSON.stringify(app, null, 2))}
+                    className="me-2"
+                    onClick={() => {
+                      const details = {
+                        ...member,
+                        fullName: `${member.surname} ${member.name}`,
+                        status: status
+                      };
+                      alert(JSON.stringify(details, null, 2));
+                    }}
                   >
-                    View Details
+                    <i className="fas fa-eye me-1"></i> View Details
                   </Button>
                   <Button
                     variant="danger"
                     size="sm"
-                    className="ms-2"
-                    onClick={() => handleDelete(app.id)}
+                    onClick={() => handleDelete(member.id)}
                   >
-                    Delete
+                    <i className="fas fa-trash-alt me-1"></i> Delete
                   </Button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </Table>
-        
+                </div>
+              </Card.Body>
+            </Card>
+          ))}
+        </div>
+
         {applications.length === 0 && (
           <div className="text-center py-5">
-            <p className="text-muted mb-0">No {status} applications found</p>
+            <p className="text-muted mb-0">No {status} members found</p>
           </div>
         )}
       </div>
@@ -142,21 +205,21 @@ const MembershipManagement = () => {
         </h2>
         
         <div className="applications-grid mb-4">
-          <div className="application-stat-card">
+          <div className="application-stat-card pending">
             <div className="application-count status-pending">
               {getApplicationsByStatus('pending').length}
             </div>
             <div className="application-label">Pending Applications</div>
           </div>
           
-          <div className="application-stat-card">
+          <div className="application-stat-card approved">
             <div className="application-count status-approved">
               {getApplicationsByStatus('approved').length}
             </div>
             <div className="application-label">Approved Members</div>
           </div>
           
-          <div className="application-stat-card">
+          <div className="application-stat-card rejected">
             <div className="application-count status-rejected">
               {getApplicationsByStatus('rejected').length}
             </div>
@@ -167,16 +230,50 @@ const MembershipManagement = () => {
         <Tabs
           activeKey={activeTab}
           onSelect={(k) => setActiveTab(k)}
-          className="mb-4"
+          className="mb-4 membership-tabs"
+          fill
         >
-          <Tab eventKey="pending" title="Pending Applications">
-            {renderApplicationsTable('pending')}
+          <Tab 
+            eventKey="pending" 
+            title={
+              <div className="d-flex align-items-center">
+                <span className="status-pending me-2">●</span>
+                Pending Applications
+                <Badge bg="warning" className="ms-2">
+                  {getApplicationsByStatus('pending').length}
+                </Badge>
+              </div>
+            }
+          >
+            {renderMemberList('pending')}
           </Tab>
-          <Tab eventKey="approved" title="Approved Members">
-            {renderApplicationsTable('approved')}
+          <Tab 
+            eventKey="approved" 
+            title={
+              <div className="d-flex align-items-center">
+                <span className="status-approved me-2">●</span>
+                Approved Members
+                <Badge bg="success" className="ms-2">
+                  {getApplicationsByStatus('approved').length}
+                </Badge>
+              </div>
+            }
+          >
+            {renderMemberList('approved')}
           </Tab>
-          <Tab eventKey="rejected" title="Rejected Applications">
-            {renderApplicationsTable('rejected')}
+          <Tab 
+            eventKey="rejected" 
+            title={
+              <div className="d-flex align-items-center">
+                <span className="status-rejected me-2">●</span>
+                Rejected Applications
+                <Badge bg="danger" className="ms-2">
+                  {getApplicationsByStatus('rejected').length}
+                </Badge>
+              </div>
+            }
+          >
+            {renderMemberList('rejected')}
           </Tab>
         </Tabs>
       </div>

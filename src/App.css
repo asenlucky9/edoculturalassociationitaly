@@ -618,32 +618,56 @@ footer h5 {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 1rem;
+  margin: 1rem 0;
 }
 
 .application-stat-card {
   background: white;
+  padding: 1.5rem;
   border-radius: 8px;
-  padding: 1.25rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   text-align: center;
-  transition: all 0.3s ease;
-  border: 1px solid var(--border-color);
+  transition: transform 0.3s ease;
 }
 
 .application-stat-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+  transform: translateY(-5px);
 }
 
 .application-count {
   font-size: 2.5rem;
-  font-weight: 700;
+  font-weight: bold;
   margin-bottom: 0.5rem;
 }
 
 .application-label {
   font-size: 1rem;
   font-weight: 500;
-  color: var(--text-color);
+  color: #333;
+}
+
+.status-pending {
+  color: #f0ad4e;
+}
+
+.status-approved {
+  color: #5cb85c;
+}
+
+.status-rejected {
+  color: #d9534f;
+}
+
+.application-stat-card.pending {
+  border-left: 4px solid #f0ad4e;
+}
+
+.application-stat-card.approved {
+  border-left: 4px solid #5cb85c;
+}
+
+.application-stat-card.rejected {
+  border-left: 4px solid #d9534f;
 }
 
 /* Enhanced Responsive Design */
@@ -1013,5 +1037,360 @@ footer h5 {
 
   .counter-description {
     font-size: 1rem;
+  }
+}
+
+/* Custom Tab Styles */
+.nav-tabs {
+  border-bottom: 2px solid #dee2e6;
+  margin-bottom: 1.5rem;
+}
+
+.nav-tabs .nav-item {
+  margin-bottom: -2px;
+}
+
+.nav-tabs .nav-link {
+  border: none;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  color: #666;
+  font-weight: 600;
+  padding: 1rem 1.5rem;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.nav-tabs .nav-link:hover {
+  border-color: transparent;
+  color: var(--primary-color);
+  background-color: rgba(26, 35, 126, 0.05);
+}
+
+.nav-tabs .nav-link.active {
+  color: var(--primary-color);
+  border-color: var(--primary-color);
+  background-color: rgba(26, 35, 126, 0.1);
+}
+
+/* Tab Content Animation */
+.tab-content > .tab-pane {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Membership Tabs Styling */
+.membership-tabs .nav-link {
+  color: #1a1a1a;
+  background-color: #ffffff;
+  border: 1px solid #dee2e6;
+  margin-right: 4px;
+  border-radius: 8px 8px 0 0;
+  padding: 1rem;
+  font-weight: 700;
+  transition: all 0.3s ease;
+  font-size: 1.1rem;
+}
+
+.membership-tabs .nav-link:hover {
+  background-color: #f8f9fa;
+  border-color: #1a237e;
+  color: #1a237e;
+}
+
+.membership-tabs .nav-link.active {
+  background-color: #1a237e;
+  border-color: #1a237e;
+  color: #ffffff;
+}
+
+.membership-tabs .nav-link .badge {
+  font-size: 1rem;
+  padding: 0.4em 0.8em;
+  font-weight: 600;
+}
+
+/* Table Styles */
+.table {
+  color: #1a1a1a;
+  font-size: 1rem;
+}
+
+.table thead th {
+  background-color: #f8f9fa;
+  color: #1a1a1a;
+  font-weight: 700;
+  padding: 1rem;
+  border-bottom: 2px solid #dee2e6;
+}
+
+.table tbody td {
+  color: #1a1a1a;
+  font-weight: 500;
+  padding: 1rem;
+  vertical-align: middle;
+}
+
+/* Status Colors */
+.status-pending {
+  color: #d35400;
+  font-weight: 700;
+}
+
+.status-approved {
+  color: #27ae60;
+  font-weight: 700;
+}
+
+.status-rejected {
+  color: #c0392b;
+  font-weight: 700;
+}
+
+/* Card Status Labels */
+.application-label {
+  color: #1a1a1a;
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-top: 0.5rem;
+}
+
+.application-count {
+  font-size: 2.5rem;
+  font-weight: 800;
+}
+
+/* Management Title */
+.management-title {
+  color: #1a1a1a;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+/* Search Input */
+.form-control {
+  color: #1a1a1a;
+  font-weight: 500;
+}
+
+.form-control::placeholder {
+  color: #666;
+  opacity: 1;
+}
+
+/* Badge Colors */
+.badge.bg-warning {
+  background-color: #f39c12 !important;
+  color: #1a1a1a;
+}
+
+.badge.bg-success {
+  background-color: #27ae60 !important;
+  color: #ffffff;
+}
+
+.badge.bg-danger {
+  background-color: #c0392b !important;
+  color: #ffffff;
+}
+
+/* Button Styles */
+.btn {
+  font-weight: 600;
+  padding: 0.5rem 1rem;
+}
+
+.btn-success {
+  background-color: #27ae60;
+  border-color: #27ae60;
+}
+
+.btn-danger {
+  background-color: #c0392b;
+  border-color: #c0392b;
+}
+
+.btn-info {
+  background-color: #3498db;
+  border-color: #3498db;
+  color: #ffffff;
+}
+
+/* Mobile Adjustments */
+@media (max-width: 768px) {
+  .membership-tabs .nav-link {
+    font-size: 1rem;
+    padding: 0.75rem;
+  }
+  
+  .table {
+    font-size: 0.9rem;
+  }
+  
+  .application-label {
+    font-size: 1rem;
+  }
+}
+
+/* Member List Styles */
+.member-list-section {
+  padding: 1rem;
+}
+
+.search-section {
+  background: white;
+  border: 1px solid #e0e0e0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.search-input {
+  height: 45px;
+  font-size: 1rem;
+}
+
+.search-select {
+  height: 45px;
+  min-width: 180px;
+  font-size: 1rem;
+}
+
+.members-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1rem;
+}
+
+.member-card {
+  background: white;
+  border: none;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.member-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.member-name {
+  color: #1a1a1a;
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.member-info {
+  color: #4a4a4a;
+  font-size: 0.95rem;
+}
+
+.member-info i {
+  width: 20px;
+  color: #666;
+}
+
+.member-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.status-badge {
+  padding: 0.5rem 1rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+/* Responsive adjustments for member list */
+@media (max-width: 768px) {
+  .members-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .search-section {
+    padding: 1rem !important;
+  }
+
+  .search-section .d-flex {
+    flex-direction: column;
+  }
+
+  .search-select {
+    width: 100%;
+    margin-top: 1rem;
+  }
+}
+
+/* Member Photo Styles */
+.member-photo-container {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 2px solid #e0e0e0;
+  flex-shrink: 0;
+  background-color: #f8f9fa;
+}
+
+.member-photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.member-photo-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f8f9fa;
+  color: #adb5bd;
+}
+
+.member-photo-placeholder i {
+  font-size: 2.5rem;
+}
+
+/* Update member card styles */
+.member-card {
+  background: white;
+  border: none;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.member-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.member-name {
+  color: #1a1a1a;
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 576px) {
+  .member-photo-container {
+    width: 80px;
+    height: 80px;
+  }
+
+  .member-photo-placeholder i {
+    font-size: 2rem;
   }
 } 
