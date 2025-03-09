@@ -1,0 +1,105 @@
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import './AdminDashboard.css';
+import { Container, Table, Button, Badge } from 'react-bootstrap';
+import { useMemberCount } from '../../context/MemberContext';
+
+const AdminDashboard = () => {
+  const { approveApplication, rejectApplication, getApplicationsByStatus } = useMemberCount();
+  const [membershipApplications, setMembershipApplications] = useState([]);
+  const [approvedMembers, setApprovedMembers] = useState([]);
+  const [events, setEvents] = useState([]);
+  const [gallery, setGallery] = useState([]);
+  const [meetings, setMeetings] = useState([]);
+  const [newMeeting, setNewMeeting] = useState({
+    title: '',
+    date: '',
+    time: '',
+    attendees: []
+  });
+  const [selectedMembers, setSelectedMembers] = useState([]);
+  const [attendanceDate, setAttendanceDate] = useState('');
+  const [attendanceTime, setAttendanceTime] = useState('');
+  const [meetingTitle, setMeetingTitle] = useState('');
+  const [newEvent, setNewEvent] = useState({
+    title: '',
+    date: '',
+    time: '',
+    location: '',
+    description: '',
+    image: null
+  });
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // Check authentication
+    const isAuthenticated = localStorage.getItem('adminAuthenticated');
+    if (!isAuthenticated) {
+      navigate('/admin');
+    }
+    // Load data
+    loadData();
+  }, [navigate]);
+
+  const loadData = () => {
+    // Load membership applications
+    const applications = JSON.parse(localStorage.getItem('membershipApplications') || '[]');
+    setMembershipApplications(applications);
+    
+    // Load approved members
+    const approved = applications.filter(app => app.status === 'approved');
+    setApprovedMembers(approved);
+    
+    // Load events
+    const storedEvents = JSON.parse(localStorage.getItem('events') || '[]');
+    console.log('Loading events from localStorage:', storedEvents);
+    setEvents(storedEvents);
+    
+    // Load other data
+    setGallery(JSON.parse(localStorage.getItem('gallery') || '[]'));
+    
+    // Load meetings data
+    setMeetings(JSON.parse(localStorage.getItem('meetings') || '[]'));
+  };
+
+  const handleMarkAttendance = () => {
+    if (!attendanceDate || !attendanceTime || !meetingTitle) {
+      alert('Please fill in all fields (Title, Date, and Time)');
+      return;
+    }
+
+    const presentMembers = selectedMembers;
+    const absentMembers = approvedMembers
+      .filter(member => !selectedMembers.includes(member.id))
+      .map(member => member.id);
+
+    const newAttendance = {
+      id: Date.now(),
+      title: meetingTitle,
+      date: `${attendanceDate}T${attendanceTime}`,
+      attendees: presentMembers,
+      absentees: absentMembers
+    };
+    
+    const updatedMeetings = [...meetings, newAttendance];
+    setMeetings(updatedMeetings);
+    localStorage.setItem('meetings', JSON.stringify(updatedMeetings));
+    
+    // Clear selections
+    setSelectedMembers([]);
+    setAttendanceDate('');
+    setAttendanceTime('');
+    setMeetingTitle('');
+    
+    // Show success message with present and absent counts
+    alert(`Attendance marked successfully!\nPresent: ${presentMembers.length} members\nAbsent: ${absentMembers.length} members`);
+  };
+
+  return (
+    <Container>
+      {/* Your existing JSX */}
+    </Container>
+  );
+};
+
+export default AdminDashboard; 
