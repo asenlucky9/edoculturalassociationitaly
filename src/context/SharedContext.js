@@ -23,6 +23,24 @@ export const SharedProvider = ({ children }) => {
     return savedMeetings ? JSON.parse(savedMeetings) : [];
   });
 
+  const [president, setPresident] = useState(() => {
+    const savedPresident = localStorage.getItem('president');
+    return savedPresident ? JSON.parse(savedPresident) : {
+      name: 'Dr. [President\'s Name]',
+      message: `As President of the EDO Cultural Association Italy, I am honored to lead this vibrant community 
+      that bridges our rich Edo heritage with Italian culture. Our association stands as a testament to 
+      the beauty of cultural diversity and the strength of unity in our new home.
+
+      We are committed to preserving and sharing our traditions while fostering meaningful connections 
+      within the Italian community. Through our various cultural programs and events, we create spaces 
+      where our heritage thrives and where cultural exchange flourishes.
+
+      I invite you to join us in this enriching journey of cultural celebration and community building.`,
+      yearStarted: '2020',
+      image: '/images/president.png'
+    };
+  });
+
   // Save events to localStorage
   useEffect(() => {
     localStorage.setItem('events', JSON.stringify(events));
@@ -42,6 +60,11 @@ export const SharedProvider = ({ children }) => {
   useEffect(() => {
     localStorage.setItem('meetings', JSON.stringify(meetings));
   }, [meetings]);
+
+  // Save president info to localStorage
+  useEffect(() => {
+    localStorage.setItem('president', JSON.stringify(president));
+  }, [president]);
 
   // Events functions
   const addEvent = (event) => {
@@ -114,6 +137,13 @@ export const SharedProvider = ({ children }) => {
     setMeetings(prevMeetings => prevMeetings.filter(meeting => meeting.id !== id));
   };
 
+  const updatePresident = (newInfo) => {
+    setPresident(prev => ({
+      ...prev,
+      ...newInfo
+    }));
+  };
+
   const value = {
     events,
     addEvent,
@@ -130,7 +160,9 @@ export const SharedProvider = ({ children }) => {
     meetings,
     addMeeting,
     updateMeeting,
-    deleteMeeting
+    deleteMeeting,
+    president,
+    updatePresident
   };
 
   return (

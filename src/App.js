@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { Navbar, Nav, Container, Row, Col, Button, NavDropdown } from 'react-bootstrap';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
 import Logo from './components/Logo';
@@ -13,7 +15,7 @@ import Contact from './components/pages/Contact';
 import Donate from './components/pages/Donate';
 import AdminLogin from './components/admin/AdminLogin';
 import AdminDashboard from './components/admin/AdminDashboard';
-import { MemberProvider, useMemberCount } from './context/MemberContext';
+import { MemberProvider, useMemberContext } from './context/MemberContext';
 import HeroSection from './components/HeroSection';
 import MembershipManagement from './components/admin/MembershipManagement';
 import EventsManagement from './components/admin/EventsManagement';
@@ -31,31 +33,64 @@ const ProtectedRoute = ({ children }) => {
 
 const PublicNavbar = ({ scrolled }) => {
   return (
-    <Navbar 
-      expand="lg" 
-      fixed="top" 
-      className={`navbar-custom ${scrolled ? 'scrolled' : ''}`}
-    >
+    <Navbar expand="lg" className={`navbar-custom ${scrolled ? 'scrolled' : ''}`} fixed="top">
       <Container>
-        <Navbar.Brand as={Link} to="/" className="d-flex align-items-center">
+        <Navbar.Brand as={Link} to="/">
           <Logo />
-          <span className="ms-2 brand-text">
-            Edo Cultural Association
-            <small className="d-block text-gradient">Udine, Italy</small>
-          </span>
         </Navbar.Brand>
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
         <Navbar.Collapse id="basic-navbar-nav">
-          <Nav className="ms-auto">
-            <Nav.Link as={Link} to="/" className="nav-link">Home</Nav.Link>
-            <Nav.Link as={Link} to="/about" className="nav-link">About</Nav.Link>
-            <NavDropdown title="Programs" id="programs-dropdown">
-              <NavDropdown.Item as={Link} to="/events">Events</NavDropdown.Item>
-              <NavDropdown.Item as={Link} to="/gallery">Gallery</NavDropdown.Item>
-              <NavDropdown.Item as={Link} to="/membership">Membership Registration</NavDropdown.Item>
-            </NavDropdown>
-            <Nav.Link as={Link} to="/contact" className="nav-link">Contact</Nav.Link>
-            <Nav.Link as={Link} to="/admin" className="admin-link">Admin</Nav.Link>
+          <Nav className="mx-auto">
+            <Nav.Item>
+              <Nav.Link as={Link} to="/" className="nav-link-custom">
+                <i className="fas fa-home me-1"></i>
+                Home
+              </Nav.Link>
+            </Nav.Item>
+            <Nav.Item>
+              <Nav.Link as={Link} to="/events" className="nav-link-custom">
+                <i className="fas fa-calendar-alt me-1"></i>
+                Events
+              </Nav.Link>
+            </Nav.Item>
+            <Nav.Item>
+              <Nav.Link as={Link} to="/gallery" className="nav-link-custom">
+                <i className="fas fa-images me-1"></i>
+                Gallery
+              </Nav.Link>
+            </Nav.Item>
+            <Nav.Item>
+              <Nav.Link as={Link} to="/membership" className="nav-link-custom">
+                <i className="fas fa-users me-1"></i>
+                Membership
+              </Nav.Link>
+            </Nav.Item>
+            <Nav.Item>
+              <Nav.Link as={Link} to="/about" className="nav-link-custom">
+                <i className="fas fa-info-circle me-1"></i>
+                About
+              </Nav.Link>
+            </Nav.Item>
+            <Nav.Item>
+              <Nav.Link as={Link} to="/contact" className="nav-link-custom">
+                <i className="fas fa-envelope me-1"></i>
+                Contact
+              </Nav.Link>
+            </Nav.Item>
+          </Nav>
+          <Nav className="nav-buttons">
+            <Nav.Item>
+              <Nav.Link as={Link} to="/donate" className="donate-button">
+                <span className="button-text">Donate</span>
+                <i className="fas fa-heart"></i>
+              </Nav.Link>
+            </Nav.Item>
+            <Nav.Item>
+              <Nav.Link as={Link} to="/admin" className="admin-button">
+                <span className="button-text">Admin</span>
+                <i className="fas fa-user-shield"></i>
+              </Nav.Link>
+            </Nav.Item>
           </Nav>
         </Navbar.Collapse>
       </Container>
@@ -94,7 +129,7 @@ const AdminNavbar = () => {
 };
 
 const Footer = () => {
-  const { memberCount } = useMemberCount();
+  const { memberCount } = useMemberContext();
 
     return (
     <footer className="bg-dark text-light py-5">
@@ -196,6 +231,17 @@ const AppContent = () => {
 
     return (
     <div className="App">
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
       {/* Navigation */}
       {isAdminPage ? <AdminNavbar /> : <PublicNavbar scrolled={scrolled} />}
 
@@ -208,6 +254,7 @@ const AppContent = () => {
             {/* Public Routes */}
             <Route path="/" element={
               <>
+                <Logo />
                 <HeroSection />
                 <Home />
               </>
@@ -295,9 +342,9 @@ const App = () => {
     return (
     <SharedProvider>
       <MemberProvider>
-            <Router>
+        <Router>
           <AppContent />
-            </Router>
+        </Router>
       </MemberProvider>
     </SharedProvider>
     );

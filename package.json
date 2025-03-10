@@ -1,12 +1,29 @@
 {
-  "name": "edo-cultural-association-italy",
-  "version": "1.0.0",
+  "name": "edoculturalassociationitaly",
+  "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "react": "18.2.0",
-    "react-dom": "18.2.0",
+    "@testing-library/jest-dom": "^5.17.0",
+    "@testing-library/react": "^13.4.0",
+    "@testing-library/user-event": "^13.5.0",
+    "animate.css": "^4.1.1",
+    "aos": "^2.3.4",
+    "bootstrap": "^5.3.2",
+    "framer-motion": "^11.0.3",
+    "helmet": "^7.1.0",
+    "lottie-react": "^2.4.0",
+    "react": "^18.2.0",
+    "react-bootstrap": "^2.10.1",
+    "react-dom": "^18.2.0",
+    "react-helmet-async": "^2.0.4",
+    "react-icons": "^5.0.1",
+    "react-intersection-observer": "^9.5.3",
+    "react-router-dom": "^6.22.1",
     "react-scripts": "5.0.1",
-    "web-vitals": "2.1.4"
+    "react-toastify": "^11.0.5",
+    "sass": "^1.70.0",
+    "swiper": "^11.0.5",
+    "web-vitals": "^2.1.4"
   },
   "scripts": {
     "start": "react-scripts start",
@@ -31,5 +48,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "engines": {
+    "node": ">=16.0.0"
   }
 }

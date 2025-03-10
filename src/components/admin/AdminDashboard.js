@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import './AdminDashboard.css';
-import { Container, Row, Col, Table, Button, Badge, Tabs, Tab, Card, Form, Modal } from 'react-bootstrap';
-import { useMemberCount } from '../../context/MemberContext';
+import { Container, Row, Col, Table, Button, Badge, Tabs, Tab, Card, Form, Modal, Image, Nav } from 'react-bootstrap';
+import { useMemberContext } from '../../context/MemberContext';
+import ManagePresident from './ManagePresident';
+import { toast } from 'react-toastify';
 
 const AdminDashboard = () => {
-  const { applications, approveApplication, rejectApplication, getApplicationsByStatus } = useMemberCount();
+  const { applications, approveApplication, rejectApplication, getApplicationsByStatus } = useMemberContext();
   const [activeMainTab, setActiveMainTab] = useState('membership');
   const [activeMembershipTab, setActiveMembershipTab] = useState('pending');
   const [membershipApplications, setMembershipApplications] = useState([]);
@@ -48,11 +50,10 @@ const AdminDashboard = () => {
     }
     // Load data
     loadData();
-  }, [navigate]);
+  }, [navigate, applications]);
 
   const loadData = () => {
     // Load membership applications
-    const applications = JSON.parse(localStorage.getItem('membershipApplications') || '[]');
     setMembershipApplications(applications);
     
     // Load approved members
@@ -82,14 +83,20 @@ const AdminDashboard = () => {
   };
 
   const handleUpdateStatus = (applicationId, newStatus) => {
-    const updatedApplications = membershipApplications.map(app => {
+    if (newStatus === 'approved') {
+      approveApplication(applicationId);
+    } else if (newStatus === 'rejected') {
+      rejectApplication(applicationId);
+    }
+    
+    // Update local state
+    const updatedApplications = applications.map(app => {
       if (app.id === applicationId) {
         return { ...app, status: newStatus };
       }
       return app;
     });
     
-    localStorage.setItem('membershipApplications', JSON.stringify(updatedApplications));
     setMembershipApplications(updatedApplications);
     
     // Update approved members list
@@ -330,7 +337,7 @@ const AdminDashboard = () => {
   };
 
   const renderMembershipApplications = (status) => {
-    const filteredApplications = getApplicationsByStatus(status);
+    const filteredApplications = membershipApplications.filter(app => app.status === status);
     
     return (
       <Table responsive striped hover>
@@ -369,109 +376,487 @@ const AdminDashboard = () => {
                       variant="success"
                       size="sm"
                       className="me-2"
-                      onClick={() => approveApplication(app.id)}
+                      onClick={() => handleUpdateStatus(app.id, 'approved')}
                     >
                       Approve
                     </Button>
                     <Button
                       variant="danger"
                       size="sm"
-                      onClick={() => rejectApplication(app.id)}
+                      onClick={() => handleUpdateStatus(app.id, 'rejected')}
                     >
                       Reject
                     </Button>
                   </>
                 )}
+                <Button
+                  variant="info"
+                  size="sm"
+                  className="ms-2"
+                  onClick={() => handleViewApplication(app)}
+                >
+                  View
+                </Button>
               </td>
             </tr>
           ))}
+          {filteredApplications.length === 0 && (
+            <tr>
+              <td colSpan="7" className="text-center">
+                No {status} applications found.
+              </td>
+            </tr>
+          )}
         </tbody>
       </Table>
     );
   };
 
   return (
-    <Container className="py-5">
+    <Container fluid className="admin-dashboard py-4">
+      {/* Header Section */}
+      <div className="admin-header mb-4">
+        <Row className="align-items-center">
+          <Col md={6}>
+            <h1 className="admin-title">
+              <i className="fas fa-user-shield me-2"></i>
+              Admin Dashboard
+            </h1>
+          </Col>
+          <Col md={6} className="text-end">
+            <Button variant="outline-danger" onClick={handleLogout}>
+              <i className="fas fa-sign-out-alt me-2"></i>
+              Logout
+            </Button>
+          </Col>
+        </Row>
+      </div>
+
+      {/* Main Content */}
+      <Row>
+        {/* Sidebar Navigation */}
+        <Col md={3} lg={2} className="admin-sidebar">
+          <Card className="mb-4">
+            <Card.Body>
+              <Nav variant="pills" className="flex-column">
+                <Nav.Link 
+                  eventKey="membership" 
+                  active={activeMainTab === 'membership'}
+                  onClick={() => setActiveMainTab('membership')}
+                >
+                  <i className="fas fa-users me-2"></i>
+                  Membership
+                </Nav.Link>
+                <Nav.Link 
+                  eventKey="events" 
+                  active={activeMainTab === 'events'}
+                  onClick={() => setActiveMainTab('events')}
+                >
+                  <i className="fas fa-calendar-alt me-2"></i>
+                  Events
+                </Nav.Link>
+                <Nav.Link 
+                  eventKey="gallery" 
+                  active={activeMainTab === 'gallery'}
+                  onClick={() => setActiveMainTab('gallery')}
+                >
+                  <i className="fas fa-images me-2"></i>
+                  Gallery
+                </Nav.Link>
+                <Nav.Link 
+                  eventKey="meetings" 
+                  active={activeMainTab === 'meetings'}
+                  onClick={() => setActiveMainTab('meetings')}
+                >
+                  <i className="fas fa-handshake me-2"></i>
+                  Meetings
+                </Nav.Link>
+                <Nav.Link 
+                  eventKey="president" 
+                  active={activeMainTab === 'president'}
+                  onClick={() => setActiveMainTab('president')}
+                >
+                  <i className="fas fa-user-tie me-2"></i>
+                  President
+                </Nav.Link>
+              </Nav>
+            </Card.Body>
+          </Card>
+        </Col>
+
+        {/* Main Content Area */}
+        <Col md={9} lg={10} className="admin-content">
+          <Card>
+            <Card.Body>
+              <Tabs
+                activeKey={activeMainTab}
+                onSelect={(k) => setActiveMainTab(k)}
+                className="mb-4"
+              >
+                {/* Membership Tab */}
+                <Tab eventKey="membership" title="Membership">
       <div className="admin-section">
+                    <div className="d-flex justify-content-between align-items-center mb-4">
         <h2 className="admin-section-title">
-          <i className="fas fa-tachometer-alt"></i>
-          Dashboard Overview
+                        <i className="fas fa-users"></i>
+                        Membership Management
         </h2>
-        
-        <div className="admin-grid">
-          {/* Membership Management */}
-          <Link to="/admin/membership" className="management-link">
-            <h3 className="management-title">
-              <i className="fas fa-users me-2"></i>
-              Membership Management
-            </h3>
-            <p className="management-description">
-              Manage member registrations, approvals, and member information
-            </p>
-          </Link>
+                      <Form.Control
+                        type="search"
+                        placeholder="Search members..."
+                        className="w-auto"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                      />
+                    </div>
+                    
+                    <Tabs
+                      activeKey={activeMembershipTab}
+                      onSelect={(k) => setActiveMembershipTab(k)}
+                      className="mb-4"
+                    >
+                      <Tab eventKey="pending" title="Pending Applications">
+                        {renderMembershipApplications('pending')}
+                      </Tab>
+                      <Tab eventKey="approved" title="Approved Members">
+                        {renderMembershipApplications('approved')}
+                      </Tab>
+                      <Tab eventKey="rejected" title="Rejected Applications">
+                        {renderMembershipApplications('rejected')}
+                      </Tab>
+                    </Tabs>
+                  </div>
+                </Tab>
 
-          {/* Events Management */}
-          <Link to="/admin/events" className="management-link">
-            <h3 className="management-title">
-              <i className="fas fa-calendar-alt me-2"></i>
+                {/* Events Tab */}
+                <Tab eventKey="events" title="Events">
+                  <div className="admin-section">
+                    <h2 className="admin-section-title mb-4">
+                      <i className="fas fa-calendar-alt"></i>
               Events Management
-            </h3>
-            <p className="management-description">
-              Create and manage cultural events, workshops, and gatherings
-            </p>
-          </Link>
+                    </h2>
+                    
+                    <Row className="g-4">
+                      <Col md={6}>
+                        <Card className="h-100">
+                          <Card.Header>
+                            <h3 className="mb-0">Add New Event</h3>
+                          </Card.Header>
+                          <Card.Body>
+                            <Form onSubmit={handleAddEvent}>
+                              <Form.Group className="mb-3">
+                                <Form.Label>Event Title</Form.Label>
+                                <Form.Control
+                                  type="text"
+                                  value={newEvent.title}
+                                  onChange={(e) => setNewEvent({...newEvent, title: e.target.value})}
+                                  required
+                                />
+                              </Form.Group>
+                              <Form.Group className="mb-3">
+                                <Form.Label>Date</Form.Label>
+                                <Form.Control
+                                  type="date"
+                                  value={newEvent.date}
+                                  onChange={(e) => setNewEvent({...newEvent, date: e.target.value})}
+                                  required
+                                />
+                              </Form.Group>
+                              <Form.Group className="mb-3">
+                                <Form.Label>Time</Form.Label>
+                                <Form.Control
+                                  type="time"
+                                  value={newEvent.time}
+                                  onChange={(e) => setNewEvent({...newEvent, time: e.target.value})}
+                                  required
+                                />
+                              </Form.Group>
+                              <Form.Group className="mb-3">
+                                <Form.Label>Location</Form.Label>
+                                <Form.Control
+                                  type="text"
+                                  value={newEvent.location}
+                                  onChange={(e) => setNewEvent({...newEvent, location: e.target.value})}
+                                  required
+                                />
+                              </Form.Group>
+                              <Form.Group className="mb-3">
+                                <Form.Label>Description</Form.Label>
+                                <Form.Control
+                                  as="textarea"
+                                  rows={3}
+                                  value={newEvent.description}
+                                  onChange={(e) => setNewEvent({...newEvent, description: e.target.value})}
+                                  required
+                                />
+                              </Form.Group>
+                              <Form.Group className="mb-3">
+                                <Form.Label>Event Image</Form.Label>
+                                <Form.Control
+                                  type="file"
+                                  onChange={handleEventImageUpload}
+                                  accept="image/*"
+                                />
+                              </Form.Group>
+                              <Button type="submit" variant="primary">Create Event</Button>
+                            </Form>
+                          </Card.Body>
+                        </Card>
+                      </Col>
+                      <Col md={6}>
+                        <Card className="h-100">
+                          <Card.Header>
+                            <h3 className="mb-0">Upcoming Events</h3>
+                          </Card.Header>
+                          <Card.Body>
+                            <div className="events-list">
+                              {events.map(event => (
+                                <Card key={event.id} className="mb-3">
+                                  <Card.Body>
+                                    <div className="d-flex justify-content-between align-items-start">
+                                      <div>
+                                        <Card.Title>{event.title}</Card.Title>
+                                        <Card.Text>
+                                          <i className="far fa-calendar-alt me-2"></i>
+                                          {new Date(event.date).toLocaleDateString()}
+                                          <br />
+                                          <i className="far fa-clock me-2"></i>
+                                          {event.time}
+                                          <br />
+                                          <i className="fas fa-map-marker-alt me-2"></i>
+                                          {event.location}
+                                        </Card.Text>
+                                      </div>
+                                      <Button 
+                                        variant="outline-danger" 
+                                        size="sm"
+                                        onClick={() => handleDeleteEvent(event.id)}
+                                      >
+                                        <i className="fas fa-trash"></i>
+                                      </Button>
+                                    </div>
+                                  </Card.Body>
+                                </Card>
+                              ))}
+                            </div>
+                          </Card.Body>
+                        </Card>
+                      </Col>
+                    </Row>
+                  </div>
+                </Tab>
 
-          {/* Gallery Management */}
-          <Link to="/admin/gallery" className="management-link">
-            <h3 className="management-title">
-              <i className="fas fa-images me-2"></i>
+                {/* Gallery Tab */}
+                <Tab eventKey="gallery" title="Gallery">
+                  <div className="admin-section">
+                    <h2 className="admin-section-title mb-4">
+                      <i className="fas fa-images"></i>
               Gallery Management
-            </h3>
-            <p className="management-description">
-              Upload and organize photos from events and cultural activities
-            </p>
-          </Link>
+                    </h2>
+                    
+                    <Card className="mb-4">
+                      <Card.Body>
+                        <Form.Group>
+                          <Form.Label>Upload New Image</Form.Label>
+                          <Form.Control
+                            type="file"
+                            onChange={handleImageUpload}
+                            accept="image/*"
+                          />
+                        </Form.Group>
+                      </Card.Body>
+                    </Card>
 
-          {/* Meetings & Attendance */}
-          <Link to="/admin/meetings" className="management-link">
-            <h3 className="management-title">
-              <i className="fas fa-clipboard-list me-2"></i>
-              Meetings & Attendance
-            </h3>
-            <p className="management-description">
-              Track meeting schedules and member attendance
-            </p>
-          </Link>
+                    <Row className="g-4">
+                      {gallery.map(image => (
+                        <Col key={image.id} md={4} lg={3}>
+                          <Card className="h-100">
+                            <Card.Img 
+                              variant="top" 
+                              src={image.url} 
+                              alt={image.caption}
+                              style={{ height: '200px', objectFit: 'cover' }}
+                            />
+                            <Card.Body>
+                              <Card.Text>{image.caption}</Card.Text>
+                              <Button 
+                                variant="outline-danger" 
+                                size="sm"
+                                onClick={() => handleDeleteImage(image.id)}
+                              >
+                                <i className="fas fa-trash"></i> Delete
+                              </Button>
+                            </Card.Body>
+                          </Card>
+                        </Col>
+                      ))}
+                    </Row>
         </div>
-      </div>
+                </Tab>
 
-      {/* Applications Section */}
-      <div className="admin-section applications-section">
-        <h2 className="admin-section-title">
-          <i className="fas fa-clipboard-check"></i>
-          Application Status
+                {/* Meetings Tab */}
+                <Tab eventKey="meetings" title="Meetings">
+                  <div className="admin-section">
+                    <h2 className="admin-section-title mb-4">
+                      <i className="fas fa-handshake"></i>
+                      Meetings Management
         </h2>
         
-        <div className="applications-grid">
-          {/* Pending Applications */}
-          <div className="application-stat-card">
-            <div className="application-count status-pending">12</div>
-            <div className="application-label">Pending Applications</div>
+                    <Row className="g-4">
+                      <Col md={6}>
+                        <Card className="h-100">
+                          <Card.Header>
+                            <h3 className="mb-0">Schedule New Meeting</h3>
+                          </Card.Header>
+                          <Card.Body>
+                            <Form onSubmit={handleAddMeeting}>
+                              <Form.Group className="mb-3">
+                                <Form.Label>Meeting Title</Form.Label>
+                                <Form.Control
+                                  type="text"
+                                  value={newMeeting.title}
+                                  onChange={(e) => setNewMeeting({...newMeeting, title: e.target.value})}
+                                  required
+                                />
+                              </Form.Group>
+                              <Form.Group className="mb-3">
+                                <Form.Label>Date</Form.Label>
+                                <Form.Control
+                                  type="date"
+                                  value={newMeeting.date}
+                                  onChange={(e) => setNewMeeting({...newMeeting, date: e.target.value})}
+                                  required
+                                />
+                              </Form.Group>
+                              <Form.Group className="mb-3">
+                                <Form.Label>Time</Form.Label>
+                                <Form.Control
+                                  type="time"
+                                  value={newMeeting.time}
+                                  onChange={(e) => setNewMeeting({...newMeeting, time: e.target.value})}
+                                  required
+                                />
+                              </Form.Group>
+                              <Button type="submit" variant="primary">Schedule Meeting</Button>
+                            </Form>
+                          </Card.Body>
+                        </Card>
+                      </Col>
+                      <Col md={6}>
+                        <Card className="h-100">
+                          <Card.Header>
+                            <h3 className="mb-0">Upcoming Meetings</h3>
+                          </Card.Header>
+                          <Card.Body>
+                            <div className="meetings-list">
+                              {meetings.map(meeting => (
+                                <Card key={meeting.id} className="mb-3">
+                                  <Card.Body>
+                                    <div className="d-flex justify-content-between align-items-start">
+                                      <div>
+                                        <Card.Title>{meeting.title}</Card.Title>
+                                        <Card.Text>
+                                          <i className="far fa-calendar-alt me-2"></i>
+                                          {new Date(meeting.date).toLocaleDateString()}
+                                          <br />
+                                          <i className="far fa-clock me-2"></i>
+                                          {meeting.time}
+                                        </Card.Text>
           </div>
-
-          {/* Approved Members */}
-          <div className="application-stat-card">
-            <div className="application-count status-approved">45</div>
-            <div className="application-label">Approved Members</div>
+                                      <Button 
+                                        variant="primary" 
+                                        size="sm"
+                                        onClick={() => handleViewMeeting(meeting)}
+                                      >
+                                        <i className="fas fa-eye"></i> View Attendance
+                                      </Button>
           </div>
-
-          {/* Rejected Applications */}
-          <div className="application-stat-card">
-            <div className="application-count status-rejected">3</div>
-            <div className="application-label">Rejected Applications</div>
+                                  </Card.Body>
+                                </Card>
+                              ))}
           </div>
+                          </Card.Body>
+                        </Card>
+                      </Col>
+                    </Row>
         </div>
+                </Tab>
+
+                {/* President Tab */}
+                <Tab eventKey="president" title="President">
+                  <div className="admin-section">
+                    <h2 className="admin-section-title mb-4">
+                      <i className="fas fa-user-tie"></i>
+                      President Management
+                    </h2>
+                    <ManagePresident />
       </div>
+                </Tab>
+              </Tabs>
+            </Card.Body>
+          </Card>
+        </Col>
+      </Row>
+
+      {/* Modals */}
+      <Modal show={!!selectedApplication} onHide={handleCloseModal}>
+        <Modal.Header closeButton>
+          <Modal.Title>Application Details</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {selectedApplication && (
+            <>
+              <p><strong>Name:</strong> {selectedApplication.name}</p>
+              <p><strong>Email:</strong> {selectedApplication.email}</p>
+              <p><strong>Status:</strong> {selectedApplication.status}</p>
+              {/* Add more application details as needed */}
+            </>
+          )}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={handleCloseModal}>
+            Close
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      <Modal show={!!selectedMeeting} onHide={handleCloseAttendanceModal} size="lg">
+        <Modal.Header closeButton>
+          <Modal.Title>Meeting Attendance</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {selectedMeeting && (
+            <Table striped bordered hover>
+              <thead>
+                <tr>
+                  <th>Member Name</th>
+                  <th>Attendance</th>
+                </tr>
+              </thead>
+              <tbody>
+                {approvedMembers.map(member => (
+                  <tr key={member.id}>
+                    <td>{member.name} {member.surname}</td>
+                    <td>
+                      <Form.Check
+                        type="checkbox"
+                        checked={selectedMeeting.attendees.includes(member.id)}
+                        onChange={(e) => handleUpdateAttendance(selectedMeeting.id, member.id, e.target.checked)}
+                        label={selectedMeeting.attendees.includes(member.id) ? "Present" : "Absent"}
+                      />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
+          )}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={handleCloseAttendanceModal}>
+            Close
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </Container>
   );
 };

@@ -5,7 +5,7 @@ import { Container, Row, Col, Card } from 'react-bootstrap';
 import { useShared } from '../../context/SharedContext';
 
 const Home = () => {
-  const { events } = useShared();
+  const { events, president } = useShared();
 
   // Get only upcoming events (events with dates in the future)
   const upcomingEvents = events
@@ -117,15 +117,22 @@ const Home = () => {
 
       <section className="president-section">
         <div className="president-content">
-          <img 
-            src="/president-image.jpg" 
-            alt="Association President"
-            className="president-image"
-          />
+          <div className="president-image-container">
+            <img 
+              src={president.image}
+              alt={`${president.name} - President of EDO Cultural Association Italy`}
+              className="president-image"
+            />
+          </div>
           <div className="president-info">
             <h2>Message from the President</h2>
-            <p>Welcome to our cultural family. Together, we strive to maintain our rich heritage while embracing our new home in Italy.</p>
-            <span className="president-name">- King Luca</span>
+            <p>{president.message}</p>
+            <span className="president-name">
+              - {president.name}
+              <small className="ms-2 text-muted">
+                (Since {president.yearStarted})
+              </small>
+            </span>
           </div>
         </div>
       </section>

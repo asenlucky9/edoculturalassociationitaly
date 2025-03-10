@@ -53,6 +53,15 @@ export const MemberProvider = ({ children }) => {
     return [];
   });
 
+  const [applications, setApplications] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem('membershipApplications') || '[]');
+    } catch (error) {
+      console.error('Error loading applications from localStorage:', error);
+      return [];
+    }
+  });
+
   useEffect(() => {
     const saveMembersToStorage = async () => {
       try {
@@ -73,6 +82,10 @@ export const MemberProvider = ({ children }) => {
     saveMembersToStorage();
   }, [members]);
 
+  useEffect(() => {
+    localStorage.setItem('membershipApplications', JSON.stringify(applications));
+  }, [applications]);
+
   const addMember = (member) => {
     const newMember = {
       ...member,
@@ -81,6 +94,31 @@ export const MemberProvider = ({ children }) => {
       status: 'pending'
     };
     setMembers(prevMembers => [...prevMembers, newMember]);
+    setApplications(prevApplications => [...prevApplications, newMember]);
+  };
+
+  const approveApplication = (applicationId) => {
+    const updatedApplications = applications.map(app => {
+      if (app.id === applicationId) {
+        return { ...app, status: 'approved' };
+      }
+      return app;
+    });
+    setApplications(updatedApplications);
+  };
+
+  const rejectApplication = (applicationId) => {
+    const updatedApplications = applications.map(app => {
+      if (app.id === applicationId) {
+        return { ...app, status: 'rejected' };
+      }
+      return app;
+    });
+    setApplications(updatedApplications);
+  };
+
+  const getApplicationsByStatus = (status) => {
+    return applications.filter(app => app.status === status);
   };
 
   const updateMemberStatus = (id, newStatus) => {
@@ -89,10 +127,16 @@ export const MemberProvider = ({ children }) => {
         member.id === id ? { ...member, status: newStatus } : member
       )
     );
+    setApplications(prevApplications =>
+      prevApplications.map(app =>
+        app.id === id ? { ...app, status: newStatus } : app
+      )
+    );
   };
 
   const deleteMember = (id) => {
     setMembers(prevMembers => prevMembers.filter(member => member.id !== id));
+    setApplications(prevApplications => prevApplications.filter(app => app.id !== id));
   };
 
   const memberCount = members.filter(member => member.status === 'approved').length;
@@ -100,10 +144,14 @@ export const MemberProvider = ({ children }) => {
   return (
     <MemberContext.Provider value={{
       members,
+      applications,
+      memberCount,
       addMember,
       updateMemberStatus,
       deleteMember,
-      memberCount
+      approveApplication,
+      rejectApplication,
+      getApplicationsByStatus
     }}>
       {children}
     </MemberContext.Provider>
